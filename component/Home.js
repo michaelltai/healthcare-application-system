@@ -47,7 +47,7 @@ function Home({ navigation }) {
         <View style={styles.container}>
           <TouchableOpacity
             style={{ flexDirection: "column" }}
-            onPress={() => navigation.navigate("Hospital List")}
+            onPress={() => "Hospital List"}
           >
             <View style={styles.hospLtr}>
               <Icon name="hospital-building" size={20} />

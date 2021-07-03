@@ -67,18 +67,14 @@ function MedicalReminderList({ navigation }) {
                 "\t " +
                 `${item.medicationTime}`
               }
-              right={(props) => <List.Icon {...props} icon="settings-helper" />}
+              right={(props) => <List.Icon {...props} icon="chevron-right" />}
               onPress={() =>
-                ToastAndroid.showWithGravity(
-                  "Work in Progress!",
-                  ToastAndroid.SHORT,
-                  ToastAndroid.BOTTOM
-                )
+                navigation.navigate("View Medical Reminder", { item })
               }
               onLongPress={() => console.log("long press")}
             />
           )}
-          keyExtractor={(item) => item.medicationName} //! need to be unique
+          keyExtractor={(item) => item.id}
           ItemSeparatorComponent={() => <Divider />}
           ListFooterComponent={renderFooter()}
         />

@@ -104,7 +104,7 @@ function HealthReminderList({ navigation }) {
       <FAB
         style={{ position: "absolute", margin: 16, right: 0, bottom: 0 }}
         icon="plus"
-        onPress={() => navigation.navigate("Medical Reminder")}
+        onPress={() => navigation.navigate("Health Reminder")}
       />
     </PaperProvider>
   );

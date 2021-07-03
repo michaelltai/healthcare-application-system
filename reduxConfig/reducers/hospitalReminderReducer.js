@@ -1,12 +1,5 @@
 //Initial State
 const initialState = {
-  //temp stuff that came to my mind, not perma
-  medicationName: "",
-  medicationType: "",
-  medicationQuantity: 0,
-  medicationFrequency: 0,
-  medicationTime: "",
-  //end
   hospReminder: [],
 };
 

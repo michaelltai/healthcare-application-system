@@ -20,6 +20,7 @@ import {
   RadioButton,
   HelperText,
 } from "react-native-paper";
+import { MaskedTextInput } from "react-native-mask-text";
 import * as Notifications from "expo-notifications";
 import * as Permissions from "expo-permissions";
 import DropDown from "react-native-paper-dropdown";
@@ -28,7 +29,10 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { useSelector, useDispatch } from "react-redux";
 import { createMedReminder } from "../../reduxConfig/actions/medicalReminderAction";
 
-function MedEdit({ navigation }) {
+import "react-native-get-random-values";
+import { v4 as uuidv4 } from "uuid";
+
+function newMedRmd({ navigation }) {
   const { medReminder } = useSelector((state) => state.medicalReminderReducer);
   const dispatch = useDispatch();
 
@@ -64,9 +68,13 @@ function MedEdit({ navigation }) {
   const [medicalInfo, setMedicalInfo] = useState({
     medicalName: "",
     medicationTime: "",
-    medicationDoses: "0",
+    medicationDoses: "",
     showDropDown: false,
     showRmd: false,
+    medTypeError: false,
+    consumptionError: false,
+    validateName: false,
+    validateDosage: false,
   });
 
   const [medicalType, setmedicalType] = useState("");
@@ -75,6 +83,7 @@ function MedEdit({ navigation }) {
   const [show, setShow] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
 
+  //* function to set the time for the reminder
   const onChange = (event, selectedDate) => {
     const currentDate = selectedDate;
     if (currentDate) {
@@ -88,14 +97,57 @@ function MedEdit({ navigation }) {
     setShow(false);
   };
 
-  const nameError = () => {
-    return !medicalInfo.medicalName.match(/^[a-zA-Z ]*$/);
+  //* regex for wrong name input
+  const nameValidation = () => {
+    if (
+      !medicalInfo.medicalName.match(/^[a-zA-Z0-9 ]*$/) ||
+      medicalInfo.medicalName === ""
+    ) {
+      setMedicalInfo({ ...medicalInfo, validateName: true });
+      return true;
+    } else {
+      setMedicalInfo({ ...medicalInfo, validateName: false });
+      return false;
+    }
   };
 
-  const doseError = () => {
-    return !medicalInfo.medicationDoses.match(/^\d+(\.\d+)?$/);
+  //* regex for wrong dosage input
+  const dosageValidation = () => {
+    if (
+      !medicalInfo.medicationDoses.match(/^\d+(\.\d+)?$/) ||
+      medicalInfo.medicationDoses === ""
+    ) {
+      setMedicalInfo({ ...medicalInfo, validateDosage: true });
+      return true;
+    } else {
+      setMedicalInfo({ ...medicalInfo, validateDosage: false });
+      return false;
+    }
   };
 
+  const typeError = () => {
+    console.log(medicalType === "");
+    if (medicalType === "") {
+      setMedicalInfo({ ...medicalInfo, medTypeError: true });
+      console.log("type truee");
+      return true;
+    } else {
+      setMedicalInfo({ ...medicalInfo, medTypeError: false });
+      return false;
+    }
+  };
+
+  const consumpError = () => {
+    if (medicalInfo.medicationTime === "") {
+      setMedicalInfo({ ...medicalInfo, consumptionError: true });
+      return true;
+    } else {
+      setMedicalInfo({ ...medicalInfo, consumptionError: false });
+      return false;
+    }
+  };
+
+  //* function for dynamically render for the reminder time
   const renderItem = ({ item, index }) => {
     return (
       <View style={{ marginBottom: 20 }}>
@@ -117,6 +169,7 @@ function MedEdit({ navigation }) {
     );
   };
 
+  //* function to acquire permission for notification from phone
   const _getNotification = async () => {
     let { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS);
 
@@ -128,6 +181,7 @@ function MedEdit({ navigation }) {
     }
   };
 
+  //* function to set notification handler
   const setNotificationHandler = () => {
     Notifications.setNotificationHandler({
       handleNotification: async () => ({
@@ -138,13 +192,15 @@ function MedEdit({ navigation }) {
     });
   };
 
+  //* function to schedule the notification
   const setMedicalNotification = async (
     medicalTime,
     medicationtype,
     information
   ) => {
-    //Notifications.cancelAllScheduledNotificationsAsync();
+    Notifications.cancelAllScheduledNotificationsAsync(); //! remember to comment this later stage
     const notiArr = [];
+    const notiTime = [];
     for (let i = 0; i < reminders; i++) {
       let notificationid = await Notifications.scheduleNotificationAsync({
         content: {
@@ -165,21 +221,24 @@ function MedEdit({ navigation }) {
           repeats: true,
         },
       });
+      notiTime.push(medicalTime[i].value.getTime());
       notiArr.push(notificationid);
     }
 
     //? call action and put this data as payload to the reducer and keep as persistent data
     const finalData = {
+      id: uuidv4(),
       medicationName: information.medicalName,
       medicationType: medicationtype,
       medicationDosage: information.medicationDoses,
       medicationTime: information.medicationTime,
       notification: notiArr,
+      notificationTime: notiTime,
     };
 
-    medReminder.push(finalData);
+    //medReminder.push(finalData);
     //dispatching the create reminder action
-    dispatch(createMedReminder(medReminder));
+    dispatch(createMedReminder(finalData));
     console.log(finalData, medReminder);
     navigation.goBack();
     ToastAndroid.showWithGravity(
@@ -189,11 +248,13 @@ function MedEdit({ navigation }) {
     );
   };
 
+  //* for obtaining the notification permission
   useEffect(() => {
     _getNotification();
     console.log(medReminder);
   }, []);
 
+  //* set the render time dynamically
   useEffect(() => {
     const setArray = () => {
       let array = [];
@@ -240,12 +301,16 @@ function MedEdit({ navigation }) {
                 onChangeText={(text) => {
                   setMedicalInfo({ ...medicalInfo, medicalName: text });
                 }}
+                onBlur={() => {
+                  nameValidation();
+                }}
+                error={medicalInfo.validateName}
               />
-              <HelperText type="error" visible={nameError()}>
-                Can't have symbol or numbers at name!
+              <HelperText type="error" visible={medicalInfo.validateName}>
+                Name cannot be blank or contain symbols
               </HelperText>
             </View>
-            <View style={{ width: "90%", alignSelf: "center", marginTop: 20 }}>
+            <View style={{ width: "90%", alignSelf: "center" }}>
               <Subheading
                 style={{
                   fontWeight: "bold",
@@ -263,19 +328,21 @@ function MedEdit({ navigation }) {
                 showDropDown={() =>
                   setMedicalInfo({ ...medicalInfo, showDropDown: true })
                 }
-                onDismiss={() =>
-                  setMedicalInfo({ ...medicalInfo, showDropDown: false })
-                }
+                onDismiss={() => {
+                  setMedicalInfo({ ...medicalInfo, showDropDown: false });
+                }}
                 inputProps={{
                   right: <TextInput.Icon name={"menu-down"} />,
                 }}
               />
+              <HelperText type="error" visible={medicalInfo.medTypeError}>
+                Please select one!
+              </HelperText>
             </View>
             <View
               style={{
                 width: "90%",
                 alignSelf: "center",
-                marginTop: 20,
               }}
             >
               <Subheading
@@ -294,12 +361,14 @@ function MedEdit({ navigation }) {
                 <RadioButton.Item label="Before Meal" value="Before Meal" />
                 <RadioButton.Item label="After Meal" value="After Meal" />
               </RadioButton.Group>
+              <HelperText type="error" visible={medicalInfo.consumptionError}>
+                Please select one!
+              </HelperText>
             </View>
             <View
               style={{
                 width: "90%",
                 alignSelf: "center",
-                marginTop: 20,
               }}
             >
               <Subheading
@@ -318,14 +387,19 @@ function MedEdit({ navigation }) {
                 onChangeText={(text) => {
                   setMedicalInfo({ ...medicalInfo, medicationDoses: text });
                 }}
+                onBlur={() => {
+                  dosageValidation();
+                }}
+                error={medicalInfo.validateDosage}
                 keyboardType="numeric"
+                render={(props) => <MaskedTextInput {...props} mask="9.9" />}
               />
-              <HelperText type="error" visible={doseError()}>
+              <HelperText type="error" visible={medicalInfo.validateDosage}>
                 Must be a proper dosage value!
               </HelperText>
             </View>
 
-            <View style={{ width: "90%", alignSelf: "center", marginTop: 20 }}>
+            <View style={{ width: "90%", alignSelf: "center" }}>
               <Subheading
                 style={{
                   fontWeight: "bold",
@@ -405,7 +479,12 @@ function MedEdit({ navigation }) {
                   color="#404040"
                   compact={true}
                   onPress={() => {
-                    if (nameError() || doseError()) {
+                    if (
+                      nameValidation() ||
+                      typeError() ||
+                      consumpError() ||
+                      dosageValidation()
+                    ) {
                     } else {
                       setMedicalNotification(
                         textInputs,
@@ -439,4 +518,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default MedEdit;
+export default newMedRmd;
