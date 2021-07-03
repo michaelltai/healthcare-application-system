@@ -153,7 +153,7 @@ function newMedRmd({ navigation }) {
       <View style={{ marginBottom: 20 }}>
         <TextInput
           dense={true}
-          mode="flat"
+          mode="outlined"
           style={{
             fontWeight: "bold",
             textAlign: "center",
@@ -198,7 +198,7 @@ function newMedRmd({ navigation }) {
     medicationtype,
     information
   ) => {
-    Notifications.cancelAllScheduledNotificationsAsync(); //! remember to comment this later stage
+    // Notifications.cancelAllScheduledNotificationsAsync(); //! remember to comment this later stage
     const notiArr = [];
     const notiTime = [];
     for (let i = 0; i < reminders; i++) {
@@ -335,7 +335,7 @@ function newMedRmd({ navigation }) {
                   right: <TextInput.Icon name={"menu-down"} />,
                 }}
               />
-              <HelperText type="error" visible={medicalInfo.medTypeError}>
+              <HelperText type="info" visible={medicalInfo.medTypeError}>
                 Please select one!
               </HelperText>
             </View>
@@ -361,7 +361,7 @@ function newMedRmd({ navigation }) {
                 <RadioButton.Item label="Before Meal" value="Before Meal" />
                 <RadioButton.Item label="After Meal" value="After Meal" />
               </RadioButton.Group>
-              <HelperText type="error" visible={medicalInfo.consumptionError}>
+              <HelperText type="info" visible={medicalInfo.consumptionError}>
                 Please select one!
               </HelperText>
             </View>

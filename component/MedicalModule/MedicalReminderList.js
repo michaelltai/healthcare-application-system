@@ -1,12 +1,6 @@
 import React from "react";
 
-import {
-  StyleSheet,
-  View,
-  FlatList,
-  ActivityIndicator,
-  ToastAndroid,
-} from "react-native";
+import { StyleSheet, View, FlatList, ActivityIndicator } from "react-native";
 import {
   Provider as PaperProvider,
   DefaultTheme,
