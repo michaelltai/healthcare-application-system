@@ -56,7 +56,9 @@ function HospitalInfo({ route, navigation }) {
             paddingBottom: 20,
           }}
         >
-          <View style={{ flexDirection: "row" }}>
+          <Card.Cover source={require("../../assets/hospital-pic.jpg")} />
+
+          <View style={{ flexDirection: "row", marginTop: 20 }}>
             <Text
               style={{
                 fontWeight: "bold",

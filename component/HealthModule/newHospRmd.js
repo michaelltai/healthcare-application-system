@@ -32,9 +32,9 @@ import "react-native-get-random-values";
 import { v4 as uuidv4 } from "uuid";
 
 function newHospRmd({ navigation }) {
-  const { hospReminder } = useSelector(
-    (state) => state.hospitalReminderReducer
-  );
+  // const { hospReminder } = useSelector(
+  //   (state) => state.hospitalReminderReducer
+  // );
   const dispatch = useDispatch();
 
   const theme = {
@@ -56,6 +56,7 @@ function newHospRmd({ navigation }) {
     { label: "Surgery", value: "Surgery" },
     { label: "Physiotherapy", value: "Physiotherapy" },
     { label: "Rehabilitation", value: "Rehabilitation" },
+    { label: "Others", value: "Others" },
   ];
 
   const [hospitalInfo, setHospitalInfo] = useState({
@@ -63,15 +64,14 @@ function newHospRmd({ navigation }) {
     showDropDown: false,
     description: "",
     hospitalName: "",
+    reminderTime: new Date(),
+    validateName: false,
+    validateHospital: false,
+    validateAppointment: false,
   });
 
   const [appointmentType, setAppointmentType] = useState("");
-  const [descriptionheight, setDescriptionHeight] = useState(42);
-
-  //* regex for wrong name input
-  const nameError = () => {
-    return !hospitalInfo.reminderName.match(/^[a-zA-Z0-9 ]*$/);
-  };
+  const [show, setShow] = useState(false);
 
   const _getNotification = async () => {
     let { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS);
@@ -88,6 +88,86 @@ function newHospRmd({ navigation }) {
     } else {
       console.log("No permission");
     }
+  };
+
+  //* function to set the time for the reminder
+  const onChange = (event, selectedDate) => {
+    setShow(false);
+    const currentDate = selectedDate;
+    console.log("onchange called");
+    if (currentDate) {
+      setHospitalInfo({ ...hospitalInfo, reminderTime: currentDate });
+    }
+  };
+
+  //* regex for wrong name input
+  const nameValidation = () => {
+    if (
+      !hospitalInfo.reminderName.match(/^[a-zA-Z0-9 ]*$/) ||
+      hospitalInfo.reminderName === ""
+    ) {
+      setHospitalInfo({ ...hospitalInfo, validateName: true });
+      return true;
+    } else {
+      setHospitalInfo({ ...hospitalInfo, validateName: false });
+      return false;
+    }
+  };
+
+  const hospitalValidation = () => {
+    if (!hospitalInfo.hospitalName.match(/^[a-zA-Z ]*$/)) {
+      setHospitalInfo({ ...hospitalInfo, validateHospital: true });
+      return true;
+    } else {
+      setHospitalInfo({ ...hospitalInfo, validateHospital: false });
+      return false;
+    }
+  };
+
+  const typeValidation = () => {
+    if (appointmentType === "") {
+      setHospitalInfo({ ...hospitalInfo, validateAppointment: true });
+      return true;
+    } else {
+      setHospitalInfo({ ...hospitalInfo, validateAppointment: false });
+      return false;
+    }
+  };
+
+  //* function to schedule the notification
+  const setAppointmentNotification = async (type, info) => {
+    const notificationTime = info.reminderTime.getTime();
+    let notificationId = await Notifications.scheduleNotificationAsync({
+      content: {
+        title: "Health Reminder!",
+        body: `Name: ${info.reminderName} \tType: ${type}`,
+      },
+      trigger: {
+        hour: info.reminderTime.getHours(),
+        minute: info.reminderTime.getMinutes(),
+        repeats: true,
+      },
+    });
+
+    const finalData = {
+      id: uuidv4(),
+      appointmentName: info.reminderName,
+      appointmentType: type,
+      hospitalName: info.hospitalName,
+      description: info.description,
+      notificationId: notificationId,
+      notificationTime: notificationTime,
+    };
+
+    //dispatching the create reminder action
+    dispatch(createHospReminder(finalData));
+    console.log(finalData);
+    navigation.goBack();
+    ToastAndroid.showWithGravity(
+      "Reminder Saved!",
+      ToastAndroid.SHORT,
+      ToastAndroid.BOTTOM
+    );
   };
 
   useEffect(() => {
@@ -125,9 +205,13 @@ function newHospRmd({ navigation }) {
                 onChangeText={(text) => {
                   setHospitalInfo({ ...hospitalInfo, reminderName: text });
                 }}
+                onBlur={() => {
+                  nameValidation();
+                }}
+                error={hospitalInfo.validateName}
               />
-              <HelperText type="error" visible={nameError()}>
-                Can't have symbols at name!
+              <HelperText type="error" visible={hospitalInfo.validateName}>
+                Cannot be blank or contain symbols
               </HelperText>
             </View>
             <View style={{ width: "90%", alignSelf: "center" }}>
@@ -147,9 +231,13 @@ function newHospRmd({ navigation }) {
                 onChangeText={(text) => {
                   setHospitalInfo({ ...hospitalInfo, hospitalName: text });
                 }}
+                onBlur={() => {
+                  hospitalValidation();
+                }}
+                error={hospitalInfo.validateHospital}
               />
-              <HelperText type="error" visible={nameError()}>
-                Can't have symbols at name!
+              <HelperText type="error" visible={hospitalInfo.validateHospital}>
+                Cannot contain symbols or numbers
               </HelperText>
             </View>
             <View style={{ width: "90%", alignSelf: "center" }}>
@@ -177,7 +265,10 @@ function newHospRmd({ navigation }) {
                   right: <TextInput.Icon name={"menu-down"} />,
                 }}
               />
-              <HelperText type="error" visible={false}>
+              <HelperText
+                type="info"
+                visible={hospitalInfo.validateAppointment}
+              >
                 Please select one!
               </HelperText>
             </View>
@@ -189,24 +280,31 @@ function newHospRmd({ navigation }) {
               >
                 Reminder
               </Subheading>
-              <View
+              <TextInput
+                dense={true}
+                mode="outlined"
                 style={{
-                  flexDirection: "row",
-                  marginTop: 20,
-                  marginBottom: 10,
+                  fontWeight: "bold",
+                  textAlign: "center",
                 }}
-              >
-                <View style={{ flex: 1 }}>
-                  <Text
-                    style={{
-                      fontSize: 16,
-                      alignSelf: "center",
-                    }}
-                  >
-                    Time
-                  </Text>
-                </View>
-              </View>
+                onFocus={(e) => {
+                  setShow(true);
+                  e.target.blur();
+                }}
+                value={`${hospitalInfo.reminderTime.toLocaleTimeString(
+                  "en-US"
+                )}`}
+              />
+              {show && (
+                <DateTimePicker
+                  testID="dateTimePicker"
+                  value={hospitalInfo.reminderTime ?? new Date()}
+                  mode="time"
+                  is24Hour={true}
+                  display="default"
+                  onChange={onChange}
+                />
+              )}
             </View>
             <View style={{ width: "90%", alignSelf: "center" }}>
               <Subheading
@@ -229,9 +327,43 @@ function newHospRmd({ navigation }) {
                   setHospitalInfo({ ...hospitalInfo, description: text });
                 }}
               />
-              <HelperText type="error" visible={nameError()}>
-                Can't have symbols at name!
-              </HelperText>
+            </View>
+
+            <View style={styles.btnContainer}>
+              <View style={{ flex: 1, marginLeft: 150 }}>
+                <Button
+                  mode="contained"
+                  color="#404040"
+                  compact={true}
+                  style={{ justifyContent: "flex-start", marginLeft: 20 }}
+                  onPress={() => {
+                    navigation.goBack();
+                  }}
+                >
+                  Cancel
+                </Button>
+              </View>
+              <View style={{ flex: 1 }}>
+                <Button
+                  mode="contained"
+                  color="#404040"
+                  compact={true}
+                  onPress={() => {
+                    if (nameValidation() || typeValidation()) {
+                    } else {
+                      console.log("all good");
+                      setAppointmentNotification(appointmentType, hospitalInfo);
+                    }
+                  }}
+                  style={{
+                    justifyContent: "flex-end",
+                    marginLeft: 10,
+                    marginRight: 20,
+                  }}
+                >
+                  Save
+                </Button>
+              </View>
             </View>
           </View>
         </ScrollView>
@@ -239,5 +371,13 @@ function newHospRmd({ navigation }) {
     </PaperProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  btnContainer: {
+    flexDirection: "row",
+    marginTop: 30,
+    marginBottom: 20,
+  },
+});
 
 export default newHospRmd;

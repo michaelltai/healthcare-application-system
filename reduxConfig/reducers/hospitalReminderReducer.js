@@ -8,10 +8,12 @@ const hospitalReminderReducer = (state = initialState, action) => {
   switch (action.type) {
     case "CREATE_HOSPITAL_REMINDER": {
       //? push the payload into the array, not sure is this method correct or not. check back later
+      var cur = state.hospReminder;
+      var tmp = action.payload;
+      cur.push(tmp);
       return {
         ...state,
-
-        hospReminder: action.payload,
+        hospReminder: cur,
       };
     }
     case "EDIT_HOSPITAL_REMINDER": {
@@ -30,6 +32,7 @@ const hospitalReminderReducer = (state = initialState, action) => {
       //? do a loop and find the same reminder, then delete it
       return {
         ...state,
+        hospReminder: action.payload,
       };
     }
     default: {

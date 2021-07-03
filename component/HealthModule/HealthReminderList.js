@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 
 import {
   StyleSheet,
@@ -15,9 +15,12 @@ import {
   Divider,
   FAB,
 } from "react-native-paper";
-import { hospitalData } from "../Data/hospitalData";
+import { useSelector } from "react-redux";
 
 function HealthReminderList({ navigation }) {
+  const { hospReminder } = useSelector(
+    (state) => state.hospitalReminderReducer
+  );
   const theme = {
     ...DefaultTheme,
 
@@ -30,35 +33,6 @@ function HealthReminderList({ navigation }) {
       placeholder: "#8E8E8E",
     },
   };
-
-  const [healthRmd, setHealthRmd] = useState({});
-
-  const hlthData = [
-    {
-      name: "Surgery",
-      type: "admission",
-      time: "0600",
-      description: "",
-    },
-    {
-      name: "Medical Checkup",
-      type: "appointment",
-      time: "0800",
-      description: "",
-    },
-    {
-      name: "Consultation",
-      type: "appointment",
-      time: "0745",
-      description: "",
-    },
-    {
-      name: "Physiotherapy",
-      type: "appointment",
-      time: "1320",
-      description: "",
-    },
-  ];
 
   const renderFooter = () => {
     return (
@@ -81,22 +55,18 @@ function HealthReminderList({ navigation }) {
       </Appbar.Header>
       <View>
         <FlatList
-          data={hlthData}
+          data={hospReminder}
           renderItem={({ item }) => (
             <List.Item
-              title={item.name}
-              description={item.type}
-              right={(props) => <List.Icon {...props} icon="settings-helper" />}
+              title={item.appointmentName}
+              description={`Type: ${item.appointmentType} \t ${item.hospitalName}`}
+              right={(props) => <List.Icon {...props} icon="chevron-right" />}
               onPress={() =>
-                ToastAndroid.showWithGravity(
-                  "Work in Progress!",
-                  ToastAndroid.SHORT,
-                  ToastAndroid.BOTTOM
-                )
+                navigation.navigate("View Health Reminder", { item })
               }
             />
           )}
-          keyExtractor={(item) => item.name} //! this is temporary, need to be unique
+          keyExtractor={(item) => item.id}
           ItemSeparatorComponent={() => <Divider />}
           ListFooterComponent={renderFooter()}
         />
