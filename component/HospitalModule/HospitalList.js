@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 
 import {
   StyleSheet,
@@ -125,7 +125,6 @@ function HospitalList({ navigation }) {
   };
 
   const handleSearch = (txt) => {
-    //not working properly, need to fix
     const formatQuery = txt.toLowerCase();
     let data = [];
     if (formatQuery === "") {
@@ -169,23 +168,21 @@ function HospitalList({ navigation }) {
     console.log("populatecalled");
     var item = hospInfo.fullData;
     var di;
+
     for (var i in item) {
       di = calculateDistance(lat, long, item[i].latitude, item[i].longtitude);
       item[i].distance = di;
-      console.log(item[i].distance);
     }
 
     item.sort(function (a, b) {
       return a.distance - b.distance;
     });
+    console.log("populate done");
 
     setHospInfo({ ...hospInfo, data: item, fullData: item });
   };
 
   const calculateDistance = (userLat, userLong, destLat, destLong) => {
-    console.log("caldiscalled");
-    console.log(userLat, userLong, destLat, destLong);
-
     var radLat1 = (Math.PI * userLat) / 180;
     var radLat2 = (Math.PI * destLat) / 180;
     var thetaLat = ((destLat - userLat) * Math.PI) / 180;
@@ -212,6 +209,23 @@ function HospitalList({ navigation }) {
       100
     );
   };
+
+  const renderItem = ({ item }) => (
+    <List.Item
+      key={item.name}
+      title={item.name}
+      description={`Phone No: ${item.number}`}
+      left={(props) => (
+        <Text style={styles.distance}>{`${item.distance}\napprox.\nKM`}</Text>
+      )}
+      right={(props) => <List.Icon {...props} icon="chevron-right" />}
+      onPress={() =>
+        navigation.navigate("Hospital Information", { info: item })
+      }
+      onLongPress={() => Linking.openURL(`tel://${item.number}`)}
+    />
+  );
+  const memoizedValue = useMemo(() => renderItem, []);
   return (
     <PaperProvider theme={theme}>
       <Appbar.Header
@@ -252,20 +266,11 @@ function HospitalList({ navigation }) {
         </Modal>
         <FlatList
           data={hospInfo.data}
-          renderItem={({ item }) => (
-            <List.Item
-              title={item.name}
-              description={`Phone No: ${item.number}`}
-              left={(props) => (
-                <Text style={styles.distance}>{`${item.distance}\nKM`}</Text>
-              )}
-              right={(props) => <List.Icon {...props} icon="chevron-right" />}
-              onPress={() =>
-                navigation.navigate("Hospital Information", { info: item })
-              }
-              onLongPress={() => Linking.openURL(`tel://${item.number}`)}
-            />
-          )}
+          renderItem={memoizedValue}
+          initialNumToRender={20}
+          removeClippedSubviews={true}
+          maxToRenderPerBatch={20}
+          updateCellsBatchingPeriod={1000}
           keyExtractor={(item) => item.number}
           ItemSeparatorComponent={() => <Divider />}
           ListHeaderComponent={renderHeader()}
@@ -286,7 +291,7 @@ const styles = StyleSheet.create({
     paddingTop: 10,
     fontWeight: "bold",
     textAlign: "center",
-    fontSize: 15,
+    fontSize: 14,
   },
 });
 

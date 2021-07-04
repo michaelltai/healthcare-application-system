@@ -21,7 +21,6 @@ import {
   HelperText,
   Switch,
 } from "react-native-paper";
-import { MaskedTextInput } from "react-native-mask-text";
 import * as Notifications from "expo-notifications";
 import * as Permissions from "expo-permissions";
 import DropDown from "react-native-paper-dropdown";

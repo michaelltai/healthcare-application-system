@@ -51,7 +51,7 @@ const App = () => {
           component={HealthReminderList}
         />
         <Stack.Screen name="Health Reminder" component={newHospRmd} />
-        {/* <Stack.Screen name="Edit Health Reminder" component={editHospRmd} />*/}
+        <Stack.Screen name="Edit Health Reminder" component={editHospRmd} />
         <Stack.Screen name="View Health Reminder" component={viewHospRmd} />
 
         <Stack.Screen name="Profile" component={Profile} />

@@ -5,7 +5,6 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   ScrollView,
-  FlatList,
   ToastAndroid,
 } from "react-native";
 
@@ -16,8 +15,6 @@ import {
   Appbar,
   Subheading,
   TextInput,
-  Text,
-  RadioButton,
   HelperText,
 } from "react-native-paper";
 import * as Notifications from "expo-notifications";
@@ -349,7 +346,11 @@ function newHospRmd({ navigation }) {
                   color="#404040"
                   compact={true}
                   onPress={() => {
-                    if (nameValidation() || typeValidation()) {
+                    if (
+                      nameValidation() ||
+                      typeValidation() ||
+                      hospitalValidation()
+                    ) {
                     } else {
                       console.log("all good");
                       setAppointmentNotification(appointmentType, hospitalInfo);

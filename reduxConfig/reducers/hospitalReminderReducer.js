@@ -20,6 +20,7 @@ const hospitalReminderReducer = (state = initialState, action) => {
       //? do a loop and find the same reminder, then update the subsequent data from the payload to the store
       return {
         ...state,
+        hospReminder: action.payload,
       };
     }
     case "READ_HOSPITAL_REMINDER": {
