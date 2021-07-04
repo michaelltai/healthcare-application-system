@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 import {
   StyleSheet,
@@ -41,6 +41,10 @@ function HealthReminderList({ navigation }) {
       </View>
     );
   };
+
+  useEffect(() => {
+    console.log(hospReminder);
+  });
 
   return (
     <PaperProvider theme={theme}>

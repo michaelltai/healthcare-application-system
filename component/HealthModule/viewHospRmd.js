@@ -166,7 +166,7 @@ function viewHospRmd({ route, navigation }) {
               icon: "square-edit-outline",
               label: "Edit",
               onPress: () => {
-                // navigation.navigate("Edit Medical Reminder", { item }),
+                navigation.navigate("Edit Health Reminder", { item });
               },
             },
             {
