@@ -4,6 +4,7 @@ import {
   StyleSheet,
   View,
   FlatList,
+  VirtualizedList,
   ActivityIndicator,
   Linking,
   Platform,
@@ -21,6 +22,7 @@ import {
   Modal,
   Button,
 } from "react-native-paper";
+import { OptimizedFlatList } from "react-native-optimized-flatlist";
 import * as IntentLauncher from "expo-intent-launcher";
 import * as Permissions from "expo-permissions";
 import * as Location from "expo-location";
@@ -50,6 +52,7 @@ function HospitalList({ navigation }) {
     errorMessage: "",
     userLocation: {},
     isLocationModalVisible: false,
+    loadingAnimation: true,
     appState: AppState.currentState,
   });
 
@@ -145,7 +148,7 @@ function HospitalList({ navigation }) {
   const renderFooter = () => {
     return (
       <View style={styles.footer}>
-        <ActivityIndicator animating size="large" />
+        <ActivityIndicator animating color="#6C73FF" size="large" />
       </View>
     );
   };
@@ -179,7 +182,12 @@ function HospitalList({ navigation }) {
     });
     console.log("populate done");
 
-    setHospInfo({ ...hospInfo, data: item, fullData: item });
+    setHospInfo({
+      ...hospInfo,
+      data: item,
+      fullData: item,
+      loadingAnimation: false,
+    });
   };
 
   const calculateDistance = (userLat, userLong, destLat, destLong) => {
@@ -202,14 +210,15 @@ function HospitalList({ navigation }) {
 
   const showTips = () => {
     ToastAndroid.showWithGravityAndOffset(
-      "Tips: Long press on Item to Call Hospital",
+      "All distance showed are in approximate value",
       ToastAndroid.LONG,
-      ToastAndroid.TOP,
+      ToastAndroid.BOTTOM,
       0,
       100
     );
   };
 
+  //? try putting this outside of the function and see is there performance boost
   const renderItem = ({ item }) => (
     <List.Item
       key={item.name}
@@ -225,7 +234,11 @@ function HospitalList({ navigation }) {
       onLongPress={() => Linking.openURL(`tel://${item.number}`)}
     />
   );
-  const memoizedValue = useMemo(() => renderItem, []);
+
+  const getItem = (data, index) => data[index];
+  const getItemCount = (data) => data.length;
+  //const memoizedValue = useMemo(() => renderItem, [hospInfo.query]);
+
   return (
     <PaperProvider theme={theme}>
       <Appbar.Header
@@ -264,18 +277,37 @@ function HospitalList({ navigation }) {
             </Button>
           </View>
         </Modal>
-        <FlatList
-          data={hospInfo.data}
-          renderItem={memoizedValue}
-          initialNumToRender={20}
-          removeClippedSubviews={true}
-          maxToRenderPerBatch={20}
-          updateCellsBatchingPeriod={1000}
-          keyExtractor={(item) => item.number}
-          ItemSeparatorComponent={() => <Divider />}
-          ListHeaderComponent={renderHeader()}
-          ListFooterComponent={renderFooter()}
-        />
+
+        {!hospInfo.loadingAnimation && (
+          <VirtualizedList
+            data={hospInfo.data}
+            getItemCount={getItemCount}
+            getItem={getItem}
+            renderItem={renderItem}
+            initialNumToRender={20}
+            removeClippedSubviews={true}
+            updateCellsBatchingPeriod={10}
+            keyExtractor={(item) => item.number}
+            ItemSeparatorComponent={() => <Divider />}
+            ListHeaderComponent={renderHeader()}
+            ListFooterComponent={renderFooter()}
+          />
+        )}
+        <View
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            marginTop: 300,
+          }}
+        >
+          <ActivityIndicator
+            animating={hospInfo.loadingAnimation}
+            size={70}
+            color="#6C73FF"
+            style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+          />
+        </View>
       </View>
     </PaperProvider>
   );
