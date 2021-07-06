@@ -1,17 +1,12 @@
 import React, { useState } from "react";
-import {
-  StyleSheet,
-  Text,
-  View,
-  TouchableOpacity,
-  ToastAndroid,
-} from "react-native";
+import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
 import {
   Provider as PaperProvider,
   DefaultTheme,
   Appbar,
+  Surface,
 } from "react-native-paper";
 
 function Home({ navigation }) {
@@ -43,7 +38,20 @@ function Home({ navigation }) {
         />
       </Appbar.Header>
       <View style={styles.view}>
-        <Text style={styles.header}>Home</Text>
+        <Surface
+          style={{
+            height: "8%",
+            width: "29%",
+            alignItems: "center",
+            justifyContent: "center",
+            marginTop: 20,
+            marginLeft: 15,
+            elevation: 5,
+            borderRadius: 30,
+          }}
+        >
+          <Text style={styles.header}>Home</Text>
+        </Surface>
         <View style={styles.container}>
           <TouchableOpacity
             style={{ flexDirection: "column" }}
@@ -90,13 +98,7 @@ function Home({ navigation }) {
             <View style={{ flex: 1 }}>
               <TouchableOpacity
                 style={{ flexDirection: "column", marginTop: 5 }}
-                onPress={() =>
-                  ToastAndroid.showWithGravity(
-                    "Work in Progress!",
-                    ToastAndroid.SHORT,
-                    ToastAndroid.BOTTOM
-                  )
-                }
+                onPress={() => navigation.navigate("Disease List")}
               >
                 <View style={styles.disLkp}>
                   <Icon name="notebook" size={20} />
@@ -129,14 +131,11 @@ function Home({ navigation }) {
 const styles = StyleSheet.create({
   view: {
     flex: 1,
-    backgroundColor: "#C1FFF7",
   },
   header: {
-    marginTop: 10,
-    marginLeft: 20,
     color: "black",
     fontWeight: "bold",
-    fontSize: 35,
+    fontSize: 23,
     fontFamily: "sans-serif",
   },
   container: {

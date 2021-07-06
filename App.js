@@ -16,6 +16,9 @@ import viewHospRmd from "./component/HealthModule/viewHospRmd";
 import HospitalList from "./component/HospitalModule/HospitalList";
 import HospitalInfo from "./component/HospitalModule/HospitalInfo";
 
+import DiseaseList from "./component/DiseasesModule/DiseaseList";
+import DiseaseInfo from "./component/DiseasesModule/DiseaseInfo";
+
 import Profile from "./component/PersonalModule/Profile";
 import { Provider } from "react-redux";
 import { store, persistor } from "./reduxConfig/store";
@@ -29,33 +32,19 @@ const Drawer = createDrawerNavigator();
 const Stack = createStackNavigator();
 
 const App = () => {
-  function createHomeStack() {
+  function createDrawerStack() {
     return (
-      <Stack.Navigator
-        initialRouteName="Home"
-        screenOptions={{ headerShown: false }}
-      >
-        <Stack.Screen name="Home" component={Home} />
-        <Stack.Screen name="Hospital List" component={HospitalList} />
-        <Stack.Screen name="Hospital Information" component={HospitalInfo} />
-        <Stack.Screen
-          name="Medical Reminder List"
+      <Drawer.Navigator>
+        <Drawer.Screen name="Home" component={Home} />
+        <Drawer.Screen name="Hospital Locator" component={HospitalList} />
+        <Drawer.Screen
+          name="Medical Reminder"
           component={MedicalReminderList}
         />
-        <Stack.Screen name="Medical Reminder" component={newMedRmd} />
-        <Stack.Screen name="Edit Medical Reminder" component={editMedRmd} />
-        <Stack.Screen name="View Medical Reminder" component={viewMedRmd} />
-
-        <Stack.Screen
-          name="Health Reminder List"
-          component={HealthReminderList}
-        />
-        <Stack.Screen name="Health Reminder" component={newHospRmd} />
-        <Stack.Screen name="Edit Health Reminder" component={editHospRmd} />
-        <Stack.Screen name="View Health Reminder" component={viewHospRmd} />
-
-        <Stack.Screen name="Profile" component={Profile} />
-      </Stack.Navigator>
+        <Drawer.Screen name="Health Reminder" component={HealthReminderList} />
+        <Drawer.Screen name="Disease Lookup" component={DiseaseList} />
+        <Drawer.Screen name="Profile" component={Profile} />
+      </Drawer.Navigator>
     );
   }
 
@@ -63,19 +52,39 @@ const App = () => {
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
         <NavigationContainer>
-          <Drawer.Navigator>
-            <Drawer.Screen name="Home" component={createHomeStack} />
-            <Drawer.Screen name="Hospital Locator" component={HospitalList} />
-            <Drawer.Screen
-              name="Medical Reminder"
+          <Stack.Navigator
+            initialRouteName="Home"
+            screenOptions={{ headerShown: false }}
+          >
+            <Stack.Screen name="Home" component={createDrawerStack} />
+
+            <Stack.Screen name="Hospital List" component={HospitalList} />
+            <Stack.Screen
+              name="Hospital Information"
+              component={HospitalInfo}
+            />
+
+            <Stack.Screen name="Disease List" component={DiseaseList} />
+            <Stack.Screen name="Disease Information" component={DiseaseInfo} />
+
+            <Stack.Screen
+              name="Medical Reminder List"
               component={MedicalReminderList}
             />
-            <Drawer.Screen
-              name="Health Reminder"
+            <Stack.Screen name="Medical Reminder" component={newMedRmd} />
+            <Stack.Screen name="Edit Medical Reminder" component={editMedRmd} />
+            <Stack.Screen name="View Medical Reminder" component={viewMedRmd} />
+
+            <Stack.Screen
+              name="Health Reminder List"
               component={HealthReminderList}
             />
-            <Drawer.Screen name="Profile" component={Profile} />
-          </Drawer.Navigator>
+            <Stack.Screen name="Health Reminder" component={newHospRmd} />
+            <Stack.Screen name="Edit Health Reminder" component={editHospRmd} />
+            <Stack.Screen name="View Health Reminder" component={viewHospRmd} />
+
+            <Stack.Screen name="Profile" component={Profile} />
+          </Stack.Navigator>
         </NavigationContainer>
       </PersistGate>
     </Provider>
