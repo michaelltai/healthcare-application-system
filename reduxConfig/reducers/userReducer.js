@@ -3,10 +3,10 @@ const initialState = {
   lastName: "",
   gender: "",
   DOB: "",
-  height: 0,
-  weight: 0,
-  bpSys: 0,
-  bpDia: 0,
+  height: "",
+  weight: "",
+  bpSys: "",
+  bpDia: "",
 };
 
 const userReducer = (state = initialState, action) => {
@@ -24,7 +24,13 @@ const userReducer = (state = initialState, action) => {
       return {
         ...state,
         firstName: action.payload.fName,
-        lastName,
+        lastName: action.payload.lName,
+        gender: action.payload.gender,
+        DOB: action.payload.dob,
+        height: action.payload.height,
+        weight: action.payload.weight,
+        bpSys: action.payload.bpsystolic,
+        bpDia: action.payload.bpdiastolic,
       };
     }
     default:
