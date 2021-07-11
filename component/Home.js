@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
@@ -8,8 +8,14 @@ import {
   Appbar,
   Surface,
 } from "react-native-paper";
+import * as Notifications from "expo-notifications";
+import * as Permissions from "expo-permissions";
+
+import { useSelector } from "react-redux";
 
 function Home({ navigation }) {
+  const { firstName, lastName, gender, DOB, height, weight, bpSys, bpDia } =
+    useSelector((state) => state.userReducer);
   const theme = {
     ...DefaultTheme,
 
@@ -22,6 +28,36 @@ function Home({ navigation }) {
       placeholder: "#8E8E8E",
     },
   };
+
+  useEffect(() => {
+    if (
+      firstName ||
+      lastName ||
+      gender ||
+      DOB ||
+      height ||
+      weight ||
+      bpSys ||
+      bpDia
+    ) {
+    } else {
+      Notifications.setNotificationHandler({
+        handleNotification: async () => ({
+          shouldShowAlert: true,
+          shouldPlaySound: true,
+          shouldSetBadge: true,
+        }),
+      });
+
+      Notifications.scheduleNotificationAsync({
+        content: {
+          title: "Attention!",
+          body: "Please fill in your personal information at Personal Health to receive information regarding your health",
+        },
+        trigger: null,
+      });
+    }
+  }, []);
 
   return (
     <PaperProvider theme={theme}>
