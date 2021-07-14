@@ -14,6 +14,7 @@ import {
   Card,
   Portal,
   Modal,
+  ProgressBar,
 } from "react-native-paper";
 import DateTimePicker from "@react-native-community/datetimepicker";
 
@@ -173,6 +174,127 @@ function Profile({ navigation }) {
     dispatch(updateUser(finalData));
   };
 
+  const calculateBMI = () => {
+    if (height === "" || weight === "") {
+      console.log("bmi data unavailable");
+      return (
+        <View>
+          <Text style={{ alignSelf: "center", fontSize: 15 }}>
+            BMI Status Unavailable
+          </Text>
+        </View>
+      );
+    } else {
+      var tmpheight = parseInt(height);
+      var tmpweight = parseInt(weight);
+      tmpheight = tmpheight / 100;
+      var heightsquared = tmpheight * tmpheight;
+      var bmi = tmpweight / heightsquared;
+      bmi = bmi.toFixed(1);
+
+      if (bmi < 18.5) {
+        return (
+          <View>
+            <Text style={{ marginBottom: 15, fontWeight: "bold" }}>
+              BMI Status: {bmi}
+            </Text>
+            <ProgressBar progress={0.25} color={"#5AA8FF"} />
+            <Text>Underweight</Text>
+          </View>
+        );
+      } else if (18.5 <= bmi && bmi <= 24.9) {
+        return (
+          <View>
+            <Text style={{ marginBottom: 15, fontWeight: "bold" }}>
+              BMI Status: {bmi}
+            </Text>
+            <ProgressBar progress={0.5} color={"green"} />
+            <Text style={{ alignSelf: "center" }}>Normal</Text>
+          </View>
+        );
+      } else if (25 <= bmi && bmi <= 29.9) {
+        return (
+          <View>
+            <Text style={{ marginBottom: 15, fontWeight: "bold" }}>
+              BMI Status: {bmi}
+            </Text>
+            <ProgressBar progress={0.75} color={"#FC8D3C"} />
+            <Text style={{ alignSelf: "flex-end", marginRight: 40 }}>
+              Overweight
+            </Text>
+          </View>
+        );
+      } else {
+        return (
+          <View>
+            <Text style={{ marginBottom: 15, fontWeight: "bold" }}>
+              BMI Status: {bmi}
+            </Text>
+            <ProgressBar progress={1} color={"#FC3030"} />
+            <Text style={{ alignSelf: "flex-end" }}>Obesity</Text>
+          </View>
+        );
+      }
+    }
+  };
+
+  const calculateBP = () => {
+    if (bpDia === "" || bpSys === "") {
+      console.log("bp data unavailable");
+      return (
+        <View>
+          <Text style={{ alignSelf: "center", fontSize: 15 }}>
+            Blood Pressure Status Unavailable
+          </Text>
+        </View>
+      );
+    } else {
+      var tmpSys = parseInt(bpSys);
+      var tmpDia = parseInt(bpDia);
+      if (tmpSys <= 90 && tmpDia <= 60) {
+        return (
+          <View>
+            <Text style={{ marginBottom: 15, fontWeight: "bold" }}>
+              Blood Pressure Status: {tmpSys}/{tmpDia}
+            </Text>
+            <ProgressBar progress={0.2} color={"#5AA8FF"} />
+            <Text style={{ alignSelf: "center" }}>Low</Text>
+          </View>
+        );
+      } else if (tmpSys <= 120 && tmpDia <= 80) {
+        return (
+          <View>
+            <Text style={{ marginBottom: 15, fontWeight: "bold" }}>
+              Blood Pressure Status: {tmpSys}/{tmpDia}
+            </Text>
+            <ProgressBar progress={0.4} color={"green"} />
+            <Text style={{ alignSelf: "center" }}>Normal</Text>
+          </View>
+        );
+      } else if (tmpSys <= 140 && tmpDia <= 90) {
+        return (
+          <View>
+            <Text style={{ marginBottom: 15, fontWeight: "bold" }}>
+              Blood Pressure Status: {tmpSys}/{tmpDia}
+            </Text>
+            <ProgressBar progress={0.8} color={"orange"} />
+            <Text style={{ alignSelf: "center" }}>Elevated</Text>
+          </View>
+        );
+      } else {
+        return (
+          <View>
+            <Text style={{ marginBottom: 15, fontWeight: "bold" }}>
+              Blood Pressure Status: {tmpSys}/{tmpDia}
+            </Text>
+            <ProgressBar progress={1} color={"#FC3030"} />
+            <Text style={{ alignSelf: "center" }}>High</Text>
+          </View>
+        );
+      }
+    }
+  };
+
   return (
     <PaperProvider theme={theme}>
       <Appbar.Header
@@ -195,7 +317,7 @@ function Profile({ navigation }) {
           Profile
         </Text>
         <Divider style={{ backgroundColor: "black", marginTop: 15 }} />
-        <View style={{ marginTop: 20, marginBottom: 5 }}>
+        <View style={{ marginTop: 20, marginBottom: 80 }}>
           <Card
             style={{
               width: "90%",
@@ -276,6 +398,32 @@ function Profile({ navigation }) {
                 </View>
               </View>
             </Card.Content>
+          </Card>
+          <Card
+            style={{
+              width: "90%",
+              alignSelf: "center",
+              marginTop: 15,
+              paddingTop: 5,
+              paddingBottom: 5,
+              elevation: 4,
+              borderRadius: 20,
+            }}
+          >
+            <Card.Content>{calculateBMI()}</Card.Content>
+          </Card>
+          <Card
+            style={{
+              width: "90%",
+              alignSelf: "center",
+              marginTop: 15,
+              paddingTop: 5,
+              paddingBottom: 5,
+              elevation: 4,
+              borderRadius: 20,
+            }}
+          >
+            <Card.Content>{calculateBP()}</Card.Content>
           </Card>
         </View>
       </ScrollView>
@@ -468,7 +616,28 @@ function Profile({ navigation }) {
                     color="#404040"
                     compact={true}
                     style={{ justifyContent: "flex-start" }}
-                    onPress={() => setUserInfo({ ...userInfo, visible: false })}
+                    onPress={() =>
+                      setUserInfo({
+                        ...userInfo,
+                        firstName: firstName,
+                        lastName: lastName,
+                        gender: gender,
+                        dob: DOB,
+                        height: height,
+                        weight: weight,
+                        bpsystolic: bpSys,
+                        bpdiastolic: bpDia,
+                        visible: false,
+                        validateFirstName: false,
+                        validateLastName: false,
+                        validateGender: false,
+                        validateHeight: false,
+                        validateWeight: false,
+                        validateDOB: false,
+                        validateBpSys: false,
+                        validateBpDias: false,
+                      })
+                    }
                   >
                     Cancel
                   </Button>
