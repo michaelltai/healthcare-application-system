@@ -53,6 +53,12 @@ function viewHospRmd({ route, navigation }) {
     return <Text>{tmp}</Text>;
   };
 
+  const renderReminderDate = () => {
+    var cur = item.notificationDate;
+    let tmp = new Date(cur).toLocaleDateString("en-US");
+    return <Text>{tmp}</Text>;
+  };
+
   //* function to delete the current reminder
   const deleteReminder = async () => {
     var tmp = hospReminder;
@@ -119,6 +125,14 @@ function viewHospRmd({ route, navigation }) {
             </View>
             <View style={{ flexDirection: "row", marginTop: 20 }}>
               <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 15 }}>Reminder Date:</Text>
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text>{renderReminderDate()}</Text>
+              </View>
+            </View>
+            <View style={{ flexDirection: "row", marginTop: 20 }}>
+              <View style={{ flex: 1 }}>
                 <Text style={{ fontSize: 15 }}>Reminder Time:</Text>
               </View>
               <View style={{ flex: 1 }}>
@@ -163,7 +177,7 @@ function viewHospRmd({ route, navigation }) {
           icon={open ? "close" : "menu"}
           actions={[
             {
-              icon: "square-edit-outline",
+              icon: "calendar-edit",
               label: "Edit",
               onPress: () => {
                 navigation.navigate("Edit Health Reminder", { item });

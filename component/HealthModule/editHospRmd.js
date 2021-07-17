@@ -63,8 +63,10 @@ function editHospRmd({ route, navigation }) {
     showDropDown: false,
     description: item.description,
     hospitalName: item.hospitalName,
+    reminderDate: item.notificationDate,
     reminderTime: item.notificationTime,
     tmpTime: item.notificationTime,
+    tmpDate: item.notificationDate,
     validateName: false,
     validateHospital: false,
     validateAppointment: false,
@@ -72,6 +74,7 @@ function editHospRmd({ route, navigation }) {
 
   const [appointmentType, setAppointmentType] = useState(item.appointmentType);
   const [show, setShow] = useState(false);
+  const [showDate, setShowDate] = useState(false);
   const [isSwitchOn, setIsSwitchOn] = useState(false);
 
   //* switch for change reminder option
@@ -96,11 +99,21 @@ function editHospRmd({ route, navigation }) {
 
   //* function to set the time for the reminder
   const onChange = (event, selectedDate) => {
+    setShowDate(false);
     setShow(false);
     const currentDate = selectedDate;
     console.log("onchange called");
     if (currentDate) {
       setHospitalInfo({ ...hospitalInfo, reminderTime: currentDate });
+    }
+    console.log(currentDate);
+  };
+
+  const onDateChange = (evet, selectedDate) => {
+    setShowDate(false);
+    const currentDate = selectedDate;
+    if (currentDate) {
+      setHospitalInfo({ ...hospitalInfo, reminderDate: currentDate });
     }
   };
 
@@ -149,17 +162,14 @@ function editHospRmd({ route, navigation }) {
       if (x === item.id) {
         console.log("Match found");
         if (isSwitchOn) {
-          const notificationTime = info.reminderTime.getTime();
+          const notificationDate = info.reminderDate;
+          const notificationTime = new Date(info.reminderTime).getTime();
           let notificationId = await Notifications.scheduleNotificationAsync({
             content: {
               title: "Health Reminder!",
               body: `Name: ${info.reminderName} \tType: ${type}`,
             },
-            trigger: {
-              hour: info.reminderTime.getHours(),
-              minute: info.reminderTime.getMinutes(),
-              repeats: true,
-            },
+            trigger: info.reminderTime,
           });
 
           await Notifications.cancelScheduledNotificationAsync(
@@ -173,6 +183,7 @@ function editHospRmd({ route, navigation }) {
             description: info.description,
             hospitalName: info.hospitalName,
             notificationId: notificationId,
+            notificationDate: notificationDate,
             notificationTime: notificationTime,
           };
         } else {
@@ -183,6 +194,7 @@ function editHospRmd({ route, navigation }) {
             description: info.description,
             hospitalName: info.hospitalName,
             notificationId: item.notificationId,
+            notificationDate: item.notificationDate,
             notificationTime: item.notificationTime,
           };
         }
@@ -340,6 +352,21 @@ function editHospRmd({ route, navigation }) {
               </Subheading>
               <TextInput
                 dense={true}
+                label="Date"
+                mode="outlined"
+                style={{
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  marginBottom: 10,
+                }}
+                disabled
+                value={`${new Date(hospitalInfo.tmpDate).toLocaleDateString(
+                  "en-US"
+                )}`}
+              />
+              <TextInput
+                dense={true}
+                label="Time"
                 mode="outlined"
                 style={{
                   fontWeight: "bold",
@@ -378,6 +405,24 @@ function editHospRmd({ route, navigation }) {
                 </Subheading>
                 <TextInput
                   dense={true}
+                  label="Date"
+                  mode="outlined"
+                  style={{
+                    fontWeight: "bold",
+                    textAlign: "center",
+                    marginBottom: 10,
+                  }}
+                  onFocus={(e) => {
+                    setShowDate(true);
+                    e.target.blur();
+                  }}
+                  value={`${new Date(
+                    hospitalInfo.reminderDate
+                  ).toLocaleDateString("en-US")}`}
+                />
+                <TextInput
+                  dense={true}
+                  label="Time"
                   mode="outlined"
                   style={{
                     fontWeight: "bold",
@@ -392,6 +437,15 @@ function editHospRmd({ route, navigation }) {
                   ).toLocaleTimeString("en-US")}`}
                 />
               </View>
+            )}
+            {showDate && (
+              <DateTimePicker
+                testID="dateTimePicker"
+                value={new Date(hospitalInfo.reminderDate) ?? new Date()}
+                mode="date"
+                display="default"
+                onChange={onChange}
+              />
             )}
             {show && (
               <DateTimePicker

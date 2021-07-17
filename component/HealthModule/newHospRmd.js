@@ -69,10 +69,10 @@ function newHospRmd({ navigation }) {
 
   const [appointmentType, setAppointmentType] = useState("");
   const [show, setShow] = useState(false);
-
+  const [showDate, setShowDate] = useState(false);
   const _getNotification = async () => {
     let { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS);
-
+    console.log(await Notifications.getAllScheduledNotificationsAsync());
     if (status === "granted") {
       console.log("Notification granted");
       Notifications.setNotificationHandler({
@@ -89,9 +89,19 @@ function newHospRmd({ navigation }) {
 
   //* function to set the time for the reminder
   const onChange = (event, selectedDate) => {
+    setShowDate(false);
     setShow(false);
     const currentDate = selectedDate;
     console.log("onchange called");
+    if (currentDate) {
+      setHospitalInfo({ ...hospitalInfo, reminderTime: currentDate });
+    }
+    console.log(currentDate);
+  };
+
+  const onDateChange = (event, selectedDate) => {
+    setShowDate(false);
+    const currentDate = selectedDate;
     if (currentDate) {
       setHospitalInfo({ ...hospitalInfo, reminderTime: currentDate });
     }
@@ -133,17 +143,15 @@ function newHospRmd({ navigation }) {
 
   //* function to schedule the notification
   const setAppointmentNotification = async (type, info) => {
+    const notificationDate = info.reminderTime;
     const notificationTime = info.reminderTime.getTime();
     let notificationId = await Notifications.scheduleNotificationAsync({
       content: {
         title: "Health Reminder!",
         body: `Name: ${info.reminderName} \tType: ${type}`,
       },
-      trigger: {
-        hour: info.reminderTime.getHours(),
-        minute: info.reminderTime.getMinutes(),
-        repeats: true,
-      },
+
+      trigger: info.reminderTime,
     });
 
     const finalData = {
@@ -153,6 +161,7 @@ function newHospRmd({ navigation }) {
       hospitalName: info.hospitalName,
       description: info.description,
       notificationId: notificationId,
+      notificationDate: notificationDate,
       notificationTime: notificationTime,
     };
 
@@ -279,6 +288,24 @@ function newHospRmd({ navigation }) {
               </Subheading>
               <TextInput
                 dense={true}
+                label="Date"
+                mode="outlined"
+                style={{
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  marginBottom: 10,
+                }}
+                onFocus={(e) => {
+                  setShowDate(true);
+                  e.target.blur();
+                }}
+                value={`${hospitalInfo.reminderTime.toLocaleDateString(
+                  "en-US"
+                )}`}
+              />
+              <TextInput
+                dense={true}
+                label="Time"
                 mode="outlined"
                 style={{
                   fontWeight: "bold",
@@ -292,6 +319,15 @@ function newHospRmd({ navigation }) {
                   "en-US"
                 )}`}
               />
+              {showDate && (
+                <DateTimePicker
+                  testID="dateTimePicker"
+                  value={hospitalInfo.reminderTime ?? new Date()}
+                  mode="date"
+                  display="default"
+                  onChange={onChange}
+                />
+              )}
               {show && (
                 <DateTimePicker
                   testID="dateTimePicker"
