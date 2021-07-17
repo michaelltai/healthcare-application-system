@@ -92,8 +92,14 @@ function HospitalList({ navigation }) {
         setHospInfo({
           ...hospInfo,
           errorMessage: "Permission not Granted",
-          isLocationModalVisible: true,
+          //isLocationModalVisible: true,
+          loadingAnimation: false,
         });
+        ToastAndroid.showWithGravityAndOffset(
+          "Nearest hospital will not be calculated",
+          ToastAndroid.SHORT,
+          ToastAndroid.BOTTOM
+        );
         return;
       }
 
@@ -113,7 +119,11 @@ function HospitalList({ navigation }) {
       //! test status: not verified
       let status = Location.getProviderStatusAsync();
       if (!(await status).locationServicesEnabled) {
-        setHospInfo({ ...hospInfo, isLocationModalVisible: true });
+        setHospInfo({ ...hospInfo, loadingAnimation: false });
+        ToastAndroid.show(
+          "Nearest Hospital Will not be calculated",
+          ToastAndroid.LONG
+        );
       }
     }
   };
@@ -148,7 +158,7 @@ function HospitalList({ navigation }) {
   const renderFooter = () => {
     return (
       <View style={styles.footer}>
-        <ActivityIndicator animating color="#6C73FF" size="large" />
+        <ActivityIndicator animating size="large" />
       </View>
     );
   };
