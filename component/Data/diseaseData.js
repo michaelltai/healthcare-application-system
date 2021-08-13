@@ -2682,37 +2682,4 @@ export const diseaseData = [
       },
     ],
   },
-  // {
-  //   name: "",
-  //   description: "",
-  //   symptoms: [],
-  //   causes: [
-  // {
-  //   name: "",
-  //   description: "",
-  // },
-  //   ],
-  //   treatment: [
-  //     {
-  //       name: "",
-  //       description: "",
-  //     },
-  //   ],
-  // },  // {
-  //   name: "",
-  //   description: "",
-  //   symptoms: [],
-  //   causes: [
-  //     {
-  //       name: "",
-  //       description: "",
-  //     },
-  //   ],
-  //   treatment: [
-  //     {
-  //       name: "",
-  //       description: "",
-  //     },
-  //   ],
-  // },
 ];
