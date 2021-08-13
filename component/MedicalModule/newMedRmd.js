@@ -171,6 +171,7 @@ function newMedRmd({ navigation }) {
 
   //* function to acquire permission for notification from phone
   const _getNotification = async () => {
+    console.log(await Notifications.getAllScheduledNotificationsAsync());
     let { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS);
 
     if (status === "granted") {
