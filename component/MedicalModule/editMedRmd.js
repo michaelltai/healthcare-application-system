@@ -70,6 +70,7 @@ function editMedRmd({ route, navigation }) {
     medicalName: item.medicationName, //? put the info from the store of the chosen reminder
     medicationTime: item.medicationTime,
     medicationDoses: item.medicationDosage,
+    description: item.description,
     showDropDown: false,
     showRmd: false,
     validateName: false,
@@ -248,6 +249,7 @@ function editMedRmd({ route, navigation }) {
             medicationName: information.medicalName,
             medicationType: medicationtype,
             medicationDosage: information.medicationDoses,
+            description: information.description,
             medicationTime: information.medicationTime,
             notification: notiArr,
             notificationTime: notiTime,
@@ -258,6 +260,7 @@ function editMedRmd({ route, navigation }) {
             medicationName: information.medicalName,
             medicationType: medicationtype,
             medicationDosage: information.medicationDoses,
+            description: information.description,
             medicationTime: information.medicationTime,
             notification: item.notification,
             notificationTime: item.notificationTime,
@@ -425,6 +428,28 @@ function editMedRmd({ route, navigation }) {
               <HelperText type="error" visible={medicalInfo.validateDosage}>
                 Must be a proper dosage value!
               </HelperText>
+            </View>
+            <View style={{ width: "90%", alignSelf: "center" }}>
+              <Subheading
+                style={{
+                  fontWeight: "bold",
+                }}
+              >
+                Description
+              </Subheading>
+              <TextInput
+                dense={true}
+                label="Description"
+                mode="outlined"
+                style={{
+                  padding: 2,
+                }}
+                multiline
+                value={medicalInfo.description}
+                onChangeText={(text) => {
+                  setMedicalInfo({ ...medicalInfo, description: text });
+                }}
+              />
             </View>
 
             <View style={{ width: "90%", alignSelf: "center", marginTop: 20 }}>

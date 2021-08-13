@@ -69,6 +69,7 @@ function newMedRmd({ navigation }) {
     medicalName: "",
     medicationTime: "",
     medicationDoses: "",
+    description: "",
     showDropDown: false,
     showRmd: false,
     medTypeError: false,
@@ -151,6 +152,7 @@ function newMedRmd({ navigation }) {
   const renderItem = ({ item, index }) => {
     return (
       <View style={{ marginBottom: 20 }}>
+        <Text>Medication {index + 1}</Text>
         <TextInput
           dense={true}
           mode="outlined"
@@ -233,6 +235,7 @@ function newMedRmd({ navigation }) {
       medicationType: medicationtype,
       medicationDosage: information.medicationDoses,
       medicationTime: information.medicationTime,
+      description: information.description,
       notification: notiArr,
       notificationTime: notiTime,
     };
@@ -398,6 +401,30 @@ function newMedRmd({ navigation }) {
               <HelperText type="error" visible={medicalInfo.validateDosage}>
                 Must be a proper dosage value!
               </HelperText>
+            </View>
+
+            <View style={{ width: "90%", alignSelf: "center" }}>
+              <Subheading
+                style={{
+                  fontWeight: "bold",
+                }}
+              >
+                Description
+              </Subheading>
+              <TextInput
+                dense={true}
+                label="Description"
+                mode="outlined"
+                style={{
+                  padding: 2,
+                }}
+                multiline
+                value={medicalInfo.description}
+                onChangeText={(text) => {
+                  setMedicalInfo({ ...medicalInfo, description: text });
+                }}
+              />
+              <Text>{"\n"}</Text>
             </View>
 
             <View style={{ width: "90%", alignSelf: "center" }}>

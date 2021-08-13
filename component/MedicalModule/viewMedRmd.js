@@ -125,6 +125,16 @@ function viewMedRmd({ route, navigation }) {
             </View>
             <View style={{ flexDirection: "row", marginTop: 20 }}>
               <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 15 }}>Description:</Text>
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text>
+                  {item.description === "" ? "N/A" : item.description}
+                </Text>
+              </View>
+            </View>
+            <View style={{ flexDirection: "row", marginTop: 20 }}>
+              <View style={{ flex: 1 }}>
                 <Text style={{ fontSize: 15 }}>Reminder Time:</Text>
               </View>
               <View style={{ flex: 1, paddingBottom: 30 }}>
