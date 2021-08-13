@@ -15,6 +15,7 @@ import {
   Appbar,
   Subheading,
   TextInput,
+  Text,
   HelperText,
 } from "react-native-paper";
 import * as Notifications from "expo-notifications";
@@ -54,6 +55,14 @@ function newHospRmd({ navigation }) {
     { label: "Physiotherapy", value: "Physiotherapy" },
     { label: "Rehabilitation", value: "Rehabilitation" },
     { label: "Others", value: "Others" },
+  ];
+
+  const notiData = [
+    { label: "5 minutes before", value: 5000 },
+    { label: "10 minutes before", value: 10000 },
+    { label: "15 minutes before", value: 15000 },
+    { label: "1 hour before", value: 60000 },
+    { label: "1 day before", value: 2400000 },
   ];
 
   const [hospitalInfo, setHospitalInfo] = useState({
@@ -97,14 +106,6 @@ function newHospRmd({ navigation }) {
       setHospitalInfo({ ...hospitalInfo, reminderTime: currentDate });
     }
     console.log(currentDate);
-  };
-
-  const onDateChange = (event, selectedDate) => {
-    setShowDate(false);
-    const currentDate = selectedDate;
-    if (currentDate) {
-      setHospitalInfo({ ...hospitalInfo, reminderTime: currentDate });
-    }
   };
 
   //* regex for wrong name input
@@ -284,7 +285,7 @@ function newHospRmd({ navigation }) {
                   fontWeight: "bold",
                 }}
               >
-                Reminder
+                Appointment
               </Subheading>
               <TextInput
                 dense={true}
@@ -338,7 +339,42 @@ function newHospRmd({ navigation }) {
                   onChange={onChange}
                 />
               )}
+              <Text>{"\n"}</Text>
             </View>
+
+            <View style={{ width: "90%", alignSelf: "center" }}>
+              <Subheading
+                style={{
+                  fontWeight: "bold",
+                }}
+              >
+                Notification
+              </Subheading>
+              <DropDown
+                label={"Appointment Type"}
+                mode={"outlined"}
+                value={appointmentType}
+                setValue={setAppointmentType}
+                list={data}
+                visible={hospitalInfo.showDropDown}
+                showDropDown={() =>
+                  setHospitalInfo({ ...hospitalInfo, showDropDown: true })
+                }
+                onDismiss={() =>
+                  setHospitalInfo({ ...hospitalInfo, showDropDown: false })
+                }
+                inputProps={{
+                  right: <TextInput.Icon name={"menu-down"} />,
+                }}
+              />
+              <HelperText
+                type="info"
+                visible={hospitalInfo.validateAppointment}
+              >
+                Please select one!
+              </HelperText>
+            </View>
+
             <View style={{ width: "90%", alignSelf: "center" }}>
               <Subheading
                 style={{
