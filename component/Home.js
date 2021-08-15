@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  ImageBackground,
+} from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
 import {
@@ -7,6 +13,7 @@ import {
   DefaultTheme,
   Appbar,
   Surface,
+  IconButton,
 } from "react-native-paper";
 import * as Notifications from "expo-notifications";
 import * as Permissions from "expo-permissions";
@@ -61,7 +68,7 @@ function Home({ navigation }) {
 
   return (
     <PaperProvider theme={theme}>
-      <Appbar.Header
+      {/* <Appbar.Header
         theme={{
           ...DefaultTheme,
           colors: { primary: "#C5FFF8" },
@@ -72,94 +79,105 @@ function Home({ navigation }) {
           icon="hospital-box-outline"
           style={{ marginLeft: 100 }}
         />
-      </Appbar.Header>
-      <View style={styles.view}>
-        <Surface
+      </Appbar.Header> */}
+      <ImageBackground
+        source={require("../assets/background4.jpg")}
+        resizeMode="cover"
+        style={styles.view}
+      >
+        <View style={{ marginBottom: 80, marginTop: 40 }}>
+          <IconButton
+            icon="menu"
+            color={"white"}
+            size={30}
+            onPress={() => navigation.openDrawer()}
+          />
+        </View>
+        <Text
           style={{
-            height: "8%",
-            width: "29%",
-            alignItems: "center",
-            justifyContent: "center",
+            fontSize: 35,
+            marginLeft: 25,
+            color: "white",
+            fontWeight: "bold",
             marginTop: 20,
-            marginLeft: 15,
-            elevation: 5,
-            borderRadius: 30,
+            textShadowRadius: 3,
           }}
         >
-          <Text style={styles.header}>Home</Text>
-        </Surface>
+          Home
+        </Text>
         <View style={styles.container}>
-          <TouchableOpacity
-            style={{ flexDirection: "column" }}
-            onPress={() => navigation.navigate("Hospital List")}
-          >
-            <View style={styles.hospLtr}>
-              <Icon name="hospital-building" size={20} />
-              <View>
-                <Text style={styles.btnTxt}>HOSPITAL LOCATOR</Text>
-              </View>
-            </View>
-          </TouchableOpacity>
-
+          {/* <Surface style={styles.container}> */}
           <View style={{ flexDirection: "row" }}>
             <View style={{ flex: 1 }}>
               <TouchableOpacity
-                style={{ flexDirection: "column", marginTop: 5 }}
+                style={{ flexDirection: "column" }}
+                onPress={() => navigation.navigate("Hospital List")}
+              >
+                <View style={styles.hospLtr}>
+                  <Icon name="hospital-building" size={35} />
+                  <View>
+                    <Text style={styles.btnTxt}>HOSPITAL LOCATOR</Text>
+                  </View>
+                </View>
+              </TouchableOpacity>
+            </View>
+            <View style={{ flex: 1, marginLeft: 10 }}>
+              <TouchableOpacity
+                style={{ flexDirection: "column" }}
                 onPress={() => navigation.navigate("Medical Reminder List")}
               >
                 <View style={styles.medRmd}>
-                  <Icon name="pill" size={20} />
+                  <Icon name="pill" size={35} />
                   <View>
                     <Text style={styles.btnTxt}>MEDICAL REMINDER</Text>
                   </View>
                 </View>
               </TouchableOpacity>
             </View>
+          </View>
+
+          <View style={{ flexDirection: "row" }}>
             <View style={{ flex: 1 }}>
               <TouchableOpacity
-                style={{ flexDirection: "column", marginTop: 5 }}
+                style={{ flexDirection: "column", marginTop: 25 }}
                 onPress={() => navigation.navigate("Health Reminder List")}
               >
                 <View style={styles.hlthRmd}>
-                  <Icon name="calendar-multiple" size={20} />
+                  <Icon name="calendar-multiple" size={35} />
                   <View>
                     <Text style={styles.btnTxt}>HEALTH REMINDER</Text>
                   </View>
                 </View>
               </TouchableOpacity>
             </View>
-          </View>
-
-          <View style={{ flexDirection: "row" }}>
-            <View style={{ flex: 1 }}>
+            <View style={{ flex: 1, marginLeft: 10 }}>
               <TouchableOpacity
-                style={{ flexDirection: "column", marginTop: 5 }}
+                style={{ flexDirection: "column", marginTop: 25 }}
                 onPress={() => navigation.navigate("Disease List")}
               >
                 <View style={styles.disLkp}>
-                  <Icon name="notebook" size={20} />
+                  <Icon name="notebook" size={35} />
                   <View>
                     <Text style={styles.btnTxt}>DISEASES LOOKUP</Text>
                   </View>
                 </View>
               </TouchableOpacity>
             </View>
-            <View style={{ flex: 1 }}>
-              <TouchableOpacity
-                style={{ flexDirection: "column", marginTop: 5 }}
-                onPress={() => navigation.navigate("Profile")}
-              >
-                <View style={styles.psnHlth}>
-                  <Icon name="account-box" size={20} />
-                  <View>
-                    <Text style={styles.btnTxt}>PERSONAL HEALTH</Text>
-                  </View>
-                </View>
-              </TouchableOpacity>
-            </View>
           </View>
+          <TouchableOpacity
+            style={{ flexDirection: "column", marginTop: 25 }}
+            onPress={() => navigation.navigate("Profile")}
+          >
+            <View style={styles.psnHlth}>
+              <Icon name="account-box" size={35} />
+              <View>
+                <Text style={styles.btnTxt}>PERSONAL HEALTH</Text>
+              </View>
+            </View>
+          </TouchableOpacity>
+          {/* </Surface> */}
         </View>
-      </View>
+      </ImageBackground>
     </PaperProvider>
   );
 }
@@ -167,6 +185,7 @@ function Home({ navigation }) {
 const styles = StyleSheet.create({
   view: {
     flex: 1,
+    justifyContent: "center",
   },
   header: {
     color: "black",
@@ -175,52 +194,55 @@ const styles = StyleSheet.create({
     fontFamily: "sans-serif",
   },
   container: {
-    marginTop: 80,
+    borderRadius: 25,
+    marginTop: 20,
+    // paddingTop: 30,
+    paddingBottom: 50,
   },
   hospLtr: {
-    alignSelf: "center",
+    marginLeft: 23,
     alignItems: "center",
-    backgroundColor: "#bebcfc",
+    backgroundColor: "white",
     padding: 20,
-    width: "87%",
+    width: "85%",
     borderRadius: 15,
-    elevation: 4,
+    elevation: 8,
   },
   medRmd: {
-    marginLeft: 23,
+    marginLeft: 5,
     alignItems: "center",
-    backgroundColor: "#ade8f4",
-    padding: 35,
+    backgroundColor: "white",
+    padding: 20,
     width: "85%",
     borderRadius: 15,
-    elevation: 4,
+    elevation: 8,
   },
   hlthRmd: {
-    marginLeft: 5,
-    alignItems: "center",
-    backgroundColor: "#b6ccfe",
-    padding: 35,
-    width: "85%",
-    borderRadius: 15,
-    elevation: 4,
-  },
-  disLkp: {
     marginLeft: 23,
     alignItems: "center",
-    backgroundColor: "#bbdbfe",
-    padding: 35,
+    backgroundColor: "white",
+    padding: 20,
     width: "85%",
     borderRadius: 15,
-    elevation: 4,
+    elevation: 8,
   },
-  psnHlth: {
+  disLkp: {
     marginLeft: 5,
     alignItems: "center",
-    backgroundColor: "#baebff",
-    padding: 35,
+    backgroundColor: "white",
+    padding: 20,
     width: "85%",
     borderRadius: 15,
-    elevation: 4,
+    elevation: 8,
+  },
+  psnHlth: {
+    marginLeft: 23,
+    alignItems: "center",
+    backgroundColor: "white",
+    padding: 20,
+    width: "41%",
+    borderRadius: 15,
+    elevation: 8,
   },
   btnTxt: {
     marginTop: 7,
