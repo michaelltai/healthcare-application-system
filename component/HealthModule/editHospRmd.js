@@ -58,21 +58,39 @@ function editHospRmd({ route, navigation }) {
     { label: "Others", value: "Others" },
   ];
 
+  const notiData = [
+    { label: "On time", value: "0" },
+    { label: "5 minutes before", value: "300000" },
+    { label: "10 minutes before", value: "600000" },
+    { label: "15 minutes before", value: "900000" },
+    { label: "30 minutes before", value: "1800000" },
+    { label: "1 hour before", value: "3600000" },
+    { label: "6 hours before", value: "21600000" },
+    { label: "12 hours before", value: "43200000" },
+    { label: "1 day before", value: "86400000" },
+  ];
+
   const [hospitalInfo, setHospitalInfo] = useState({
     reminderName: item.appointmentName,
     showDropDown: false,
+    showTrigDown: false,
     description: item.description,
     hospitalName: item.hospitalName,
     reminderDate: item.notificationDate,
     reminderTime: item.notificationTime,
+    triggerTime: item.triggerTime,
     tmpTime: item.notificationTime,
     tmpDate: item.notificationDate,
     validateName: false,
     validateHospital: false,
     validateAppointment: false,
+    validateNotiTrig: false,
   });
 
   const [appointmentType, setAppointmentType] = useState(item.appointmentType);
+  const [notificationTrigger, setNotificationTrigger] = useState(
+    item.triggerDwn
+  );
   const [show, setShow] = useState(false);
   const [showDate, setShowDate] = useState(false);
   const [isSwitchOn, setIsSwitchOn] = useState(false);
@@ -151,6 +169,16 @@ function editHospRmd({ route, navigation }) {
     }
   };
 
+  const trigValidation = () => {
+    if (notificationTrigger === "") {
+      setHospitalInfo({ ...hospitalInfo, validateNotiTrig: true });
+      return true;
+    } else {
+      setHospitalInfo({ ...hospitalInfo, validateNotiTrig: false });
+      return false;
+    }
+  };
+
   //* function to schedule the notification
   const setAppointmentNotification = async (type, info) => {
     var tmp = hospReminder;
@@ -161,44 +189,124 @@ function editHospRmd({ route, navigation }) {
       var x = tmp[i].id;
       if (x === item.id) {
         console.log("Match found");
-        if (isSwitchOn) {
-          const notificationDate = info.reminderDate;
-          const notificationTime = new Date(info.reminderTime).getTime();
-          let notificationId = await Notifications.scheduleNotificationAsync({
-            content: {
-              title: "Health Reminder!",
-              body: `Name: ${info.reminderName} \tType: ${type}`,
-            },
-            trigger: info.reminderTime,
-          });
+        if (notificationTrigger === item.triggerDwn) {
+          console.log("same");
 
-          await Notifications.cancelScheduledNotificationAsync(
-            tmp[i].notificationId
-          );
+          if (isSwitchOn) {
+            const notificationDate = info.reminderTime;
+            const notificationTime = new Date(info.reminderTime).getTime();
+            const milli = info.reminderTime.getTime();
+            const newmilli = milli - parseInt(notificationTrigger);
+            const newDate = new Date(newmilli);
 
-          finalData = {
-            id: item.id,
-            appointmentName: info.reminderName,
-            appointmentType: type,
-            description: info.description,
-            hospitalName: info.hospitalName,
-            notificationId: notificationId,
-            notificationDate: notificationDate,
-            notificationTime: notificationTime,
-          };
+            let notificationId = await Notifications.scheduleNotificationAsync({
+              content: {
+                title: "Health Reminder!",
+                body: `Name: ${info.reminderName} \tType: ${type}`,
+              },
+              trigger: newDate,
+            });
+
+            await Notifications.cancelScheduledNotificationAsync(
+              tmp[i].notificationId
+            );
+
+            finalData = {
+              id: item.id,
+              appointmentName: info.reminderName,
+              appointmentType: type,
+              description: info.description,
+              hospitalName: info.hospitalName,
+              notificationId: notificationId,
+              notificationDate: notificationDate,
+              notificationTime: notificationTime,
+              triggerDwn: notificationTrigger,
+              triggerTime: newDate,
+            };
+          } else {
+            finalData = {
+              id: item.id,
+              appointmentName: info.reminderName,
+              appointmentType: type,
+              description: info.description,
+              hospitalName: info.hospitalName,
+              notificationId: item.notificationId,
+              notificationDate: item.notificationDate,
+              notificationTime: item.notificationTime,
+              triggerDwn: item.triggerDwn,
+              triggerTime: item.triggerTime,
+            };
+          }
+          tmp.splice(i, 1);
         } else {
-          finalData = {
-            id: item.id,
-            appointmentName: info.reminderName,
-            appointmentType: type,
-            description: info.description,
-            hospitalName: info.hospitalName,
-            notificationId: item.notificationId,
-            notificationDate: item.notificationDate,
-            notificationTime: item.notificationTime,
-          };
+          console.log("if trigger change");
+          console.log(notificationTrigger);
+
+          if (isSwitchOn) {
+            const notificationDate = info.reminderTime;
+            const notificationTime = new Date(info.reminderTime).getTime();
+            const milli = info.reminderTime.getTime();
+            const newmilli = milli - parseInt(notificationTrigger);
+            const newDate = new Date(newmilli);
+
+            let notificationId = await Notifications.scheduleNotificationAsync({
+              content: {
+                title: "Health Reminder!",
+                body: `Name: ${info.reminderName} \tType: ${type}`,
+              },
+              trigger: newDate,
+            });
+
+            await Notifications.cancelScheduledNotificationAsync(
+              tmp[i].notificationId
+            );
+
+            finalData = {
+              id: item.id,
+              appointmentName: info.reminderName,
+              appointmentType: type,
+              description: info.description,
+              hospitalName: info.hospitalName,
+              notificationId: notificationId,
+              notificationDate: notificationDate,
+              notificationTime: notificationTime,
+              triggerDwn: notificationTrigger,
+              triggerTime: newDate,
+            };
+          } else {
+            const notificationDate = info.reminderDate;
+            const notificationTime = new Date(info.reminderDate).getTime();
+            const milli = notificationTime;
+            const newmilli = milli - parseInt(notificationTrigger);
+            const newDate = new Date(newmilli);
+
+            let notificationId = await Notifications.scheduleNotificationAsync({
+              content: {
+                title: "Health Reminder!",
+                body: `Name: ${info.reminderName} \tType: ${type}`,
+              },
+              trigger: newDate,
+            });
+
+            await Notifications.cancelScheduledNotificationAsync(
+              tmp[i].notificationId
+            );
+
+            finalData = {
+              id: item.id,
+              appointmentName: info.reminderName,
+              appointmentType: type,
+              description: info.description,
+              hospitalName: info.hospitalName,
+              notificationId: notificationId,
+              notificationDate: notificationDate,
+              notificationTime: notificationTime,
+              triggerDwn: notificationTrigger,
+              triggerTime: newDate,
+            };
+          }
+          tmp.splice(i, 1);
         }
-        tmp.splice(i, 1);
       } else {
         console.log("Match not found");
       }
@@ -206,7 +314,6 @@ function editHospRmd({ route, navigation }) {
 
     tmp.push(finalData);
 
-    //console.log(tmp);
     //dispatching the create reminder action
     dispatch(editHospReminder(tmp));
     console.log(hospReminder);
@@ -231,7 +338,7 @@ function editHospRmd({ route, navigation }) {
         }}
       >
         <Appbar.BackAction onPress={() => navigation.goBack()} />
-        <Appbar.Content title="New Appointment" />
+        <Appbar.Content title="Edit Appointment" />
       </Appbar.Header>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <ScrollView>
@@ -326,6 +433,35 @@ function editHospRmd({ route, navigation }) {
                   fontWeight: "bold",
                 }}
               >
+                Notification
+              </Subheading>
+              <DropDown
+                label={"Notification Time"}
+                mode={"outlined"}
+                value={notificationTrigger}
+                setValue={setNotificationTrigger}
+                list={notiData}
+                visible={hospitalInfo.showTrigDown}
+                showDropDown={() =>
+                  setHospitalInfo({ ...hospitalInfo, showTrigDown: true })
+                }
+                onDismiss={() =>
+                  setHospitalInfo({ ...hospitalInfo, showTrigDown: false })
+                }
+                inputProps={{
+                  right: <TextInput.Icon name={"menu-down"} />,
+                }}
+              />
+              <HelperText type="info" visible={hospitalInfo.validateNotiTrig}>
+                Please select one!
+              </HelperText>
+            </View>
+            <View style={{ width: "90%", alignSelf: "center" }}>
+              <Subheading
+                style={{
+                  fontWeight: "bold",
+                }}
+              >
                 Description
               </Subheading>
               <TextInput
@@ -348,7 +484,7 @@ function editHospRmd({ route, navigation }) {
                   fontWeight: "bold",
                 }}
               >
-                Current Reminder
+                Current Appointment
               </Subheading>
               <TextInput
                 dense={true}
@@ -384,7 +520,7 @@ function editHospRmd({ route, navigation }) {
                       fontWeight: "bold",
                     }}
                   >
-                    Change Reminder
+                    Change Appointment
                   </Subheading>
                 </View>
                 <View style={{ flex: 1 }}>
@@ -401,7 +537,7 @@ function editHospRmd({ route, navigation }) {
                     fontWeight: "bold",
                   }}
                 >
-                  New Reminder
+                  New Appointment
                 </Subheading>
                 <TextInput
                   dense={true}
@@ -417,7 +553,7 @@ function editHospRmd({ route, navigation }) {
                     e.target.blur();
                   }}
                   value={`${new Date(
-                    hospitalInfo.reminderDate
+                    hospitalInfo.reminderTime
                   ).toLocaleDateString("en-US")}`}
                 />
                 <TextInput
@@ -481,6 +617,7 @@ function editHospRmd({ route, navigation }) {
                     if (
                       nameValidation() ||
                       typeValidation() ||
+                      trigValidation() ||
                       hospitalValidation()
                     ) {
                     } else {

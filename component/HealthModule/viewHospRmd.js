@@ -59,6 +59,18 @@ function viewHospRmd({ route, navigation }) {
     return <Text>{tmp}</Text>;
   };
 
+  const renderTriggerTime = () => {
+    var cur = item.triggerTime;
+    let tmp = new Date(cur).toLocaleTimeString("en-US");
+    return <Text>{tmp}</Text>;
+  };
+
+  const renderTriggerDate = () => {
+    var cur = item.triggerTime;
+    let tmp = new Date(cur).toLocaleDateString("en-US");
+    return <Text>{tmp}</Text>;
+  };
+
   //* function to delete the current reminder
   const deleteReminder = async () => {
     var tmp = hospReminder;
@@ -125,7 +137,7 @@ function viewHospRmd({ route, navigation }) {
             </View>
             <View style={{ flexDirection: "row", marginTop: 20 }}>
               <View style={{ flex: 1 }}>
-                <Text style={{ fontSize: 15 }}>Reminder Date:</Text>
+                <Text style={{ fontSize: 15 }}>Appointment Date:</Text>
               </View>
               <View style={{ flex: 1 }}>
                 <Text>{renderReminderDate()}</Text>
@@ -133,10 +145,26 @@ function viewHospRmd({ route, navigation }) {
             </View>
             <View style={{ flexDirection: "row", marginTop: 20 }}>
               <View style={{ flex: 1 }}>
-                <Text style={{ fontSize: 15 }}>Reminder Time:</Text>
+                <Text style={{ fontSize: 15 }}>Appointment Time:</Text>
               </View>
               <View style={{ flex: 1 }}>
                 <Text>{renderReminderTime()}</Text>
+              </View>
+            </View>
+            <View style={{ flexDirection: "row", marginTop: 20 }}>
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 15 }}>Reminder Date:</Text>
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text>{renderTriggerDate()}</Text>
+              </View>
+            </View>
+            <View style={{ flexDirection: "row", marginTop: 20 }}>
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 15 }}>Reminder Time:</Text>
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text>{renderTriggerTime()}</Text>
               </View>
             </View>
             <View style={{ flexDirection: "row", marginTop: 20 }}>

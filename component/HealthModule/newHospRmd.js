@@ -58,25 +58,32 @@ function newHospRmd({ navigation }) {
   ];
 
   const notiData = [
-    { label: "5 minutes before", value: 5000 },
-    { label: "10 minutes before", value: 10000 },
-    { label: "15 minutes before", value: 15000 },
-    { label: "1 hour before", value: 60000 },
-    { label: "1 day before", value: 2400000 },
+    { label: "On time", value: "0" },
+    { label: "5 minutes before", value: "300000" },
+    { label: "10 minutes before", value: "600000" },
+    { label: "15 minutes before", value: "900000" },
+    { label: "30 minutes before", value: "1800000" },
+    { label: "1 hour before", value: "3600000" },
+    { label: "6 hours before", value: "21600000" },
+    { label: "12 hours before", value: "43200000" },
+    { label: "1 day before", value: "86400000" },
   ];
 
   const [hospitalInfo, setHospitalInfo] = useState({
     reminderName: "",
     showDropDown: false,
+    showTrigDown: false,
     description: "",
     hospitalName: "",
     reminderTime: new Date(),
     validateName: false,
     validateHospital: false,
     validateAppointment: false,
+    validateNotiTrig: false,
   });
 
   const [appointmentType, setAppointmentType] = useState("");
+  const [notificationTrigger, setNotificationTrigger] = useState("");
   const [show, setShow] = useState(false);
   const [showDate, setShowDate] = useState(false);
   const _getNotification = async () => {
@@ -142,17 +149,34 @@ function newHospRmd({ navigation }) {
     }
   };
 
+  const trigValidation = () => {
+    if (notificationTrigger === "") {
+      setHospitalInfo({ ...hospitalInfo, validateNotiTrig: true });
+      return true;
+    } else {
+      setHospitalInfo({ ...hospitalInfo, validateNotiTrig: false });
+      return false;
+    }
+  };
+
   //* function to schedule the notification
-  const setAppointmentNotification = async (type, info) => {
+  const setAppointmentNotification = async (trigger, type, info) => {
     const notificationDate = info.reminderTime;
     const notificationTime = info.reminderTime.getTime();
+    const milli = notificationTime;
+    const newmilli = milli - parseInt(trigger);
+    const newDate = new Date(newmilli);
+
+    console.log(new Date(notificationTime).toLocaleDateString());
+    console.log(newDate.toLocaleDateString());
+
     let notificationId = await Notifications.scheduleNotificationAsync({
       content: {
         title: "Health Reminder!",
         body: `Name: ${info.reminderName} \tType: ${type}`,
       },
 
-      trigger: info.reminderTime,
+      trigger: newDate,
     });
 
     const finalData = {
@@ -164,11 +188,13 @@ function newHospRmd({ navigation }) {
       notificationId: notificationId,
       notificationDate: notificationDate,
       notificationTime: notificationTime,
+      triggerDwn: trigger,
+      triggerTime: newDate,
     };
 
     //dispatching the create reminder action
     dispatch(createHospReminder(finalData));
-    console.log(finalData);
+    //console.log(finalData);
     navigation.goBack();
     ToastAndroid.showWithGravity(
       "Reminder Saved!",
@@ -341,7 +367,6 @@ function newHospRmd({ navigation }) {
               )}
               <Text>{"\n"}</Text>
             </View>
-
             <View style={{ width: "90%", alignSelf: "center" }}>
               <Subheading
                 style={{
@@ -351,31 +376,30 @@ function newHospRmd({ navigation }) {
                 Notification
               </Subheading>
               <DropDown
-                label={"Appointment Type"}
+                label={"Notification Time"}
                 mode={"outlined"}
-                value={appointmentType}
-                setValue={setAppointmentType}
-                list={data}
-                visible={hospitalInfo.showDropDown}
+                value={notificationTrigger}
+                setValue={setNotificationTrigger}
+                list={notiData}
+                visible={hospitalInfo.showTrigDown}
                 showDropDown={() =>
-                  setHospitalInfo({ ...hospitalInfo, showDropDown: true })
+                  setHospitalInfo({ ...hospitalInfo, showTrigDown: true })
                 }
                 onDismiss={() =>
-                  setHospitalInfo({ ...hospitalInfo, showDropDown: false })
+                  setHospitalInfo({ ...hospitalInfo, showTrigDown: false })
                 }
                 inputProps={{
                   right: <TextInput.Icon name={"menu-down"} />,
                 }}
               />
-              <HelperText
-                type="info"
-                visible={hospitalInfo.validateAppointment}
-              >
+              <HelperText type="info" visible={hospitalInfo.validateNotiTrig}>
                 Please select one!
               </HelperText>
             </View>
 
-            <View style={{ width: "90%", alignSelf: "center" }}>
+            <View
+              style={{ width: "90%", alignSelf: "center", marginBottom: 50 }}
+            >
               <Subheading
                 style={{
                   fontWeight: "bold",
@@ -421,11 +445,16 @@ function newHospRmd({ navigation }) {
                     if (
                       nameValidation() ||
                       typeValidation() ||
+                      trigValidation() ||
                       hospitalValidation()
                     ) {
                     } else {
                       console.log("all good");
-                      setAppointmentNotification(appointmentType, hospitalInfo);
+                      setAppointmentNotification(
+                        notificationTrigger,
+                        appointmentType,
+                        hospitalInfo
+                      );
                     }
                   }}
                   style={{
