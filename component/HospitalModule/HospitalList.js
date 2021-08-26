@@ -124,6 +124,8 @@ function HospitalList({ navigation }) {
           "Nearest Hospital Will not be calculated",
           ToastAndroid.LONG
         );
+      } else {
+        _getLocation();
       }
     }
   };
@@ -262,7 +264,7 @@ function HospitalList({ navigation }) {
       </Appbar.Header>
       <View>
         {/* Modal to ask user to enable location permission in app settings. Not tested */}
-        <Modal
+        {/* <Modal
           visible={hospInfo.isLocationModalVisible}
           onModalHide={hospInfo.openSetting ? openSetting : undefined}
         >
@@ -286,7 +288,7 @@ function HospitalList({ navigation }) {
               Enable Location Service
             </Button>
           </View>
-        </Modal>
+        </Modal> */}
 
         {!hospInfo.loadingAnimation && (
           <VirtualizedList
