@@ -5,8 +5,9 @@ const initialState = {
   DOB: "",
   height: "",
   weight: "",
-  bpSys: "",
-  bpDia: "",
+  bpSys: [],
+  bpDia: [],
+  recDate: [],
 };
 
 const userReducer = (state = initialState, action) => {
@@ -31,6 +32,7 @@ const userReducer = (state = initialState, action) => {
         weight: action.payload.weight,
         bpSys: action.payload.bpsystolic,
         bpDia: action.payload.bpdiastolic,
+        recDate: action.payload.recordeddate,
       };
     }
     default:
