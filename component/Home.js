@@ -14,6 +14,7 @@ import {
   Appbar,
   Surface,
   IconButton,
+  Avatar,
 } from "react-native-paper";
 import * as Notifications from "expo-notifications";
 import * as Permissions from "expo-permissions";
@@ -80,19 +81,32 @@ function Home({ navigation }) {
           style={{ marginLeft: 100 }}
         />
       </Appbar.Header> */}
+
       <ImageBackground
         source={require("../assets/background4.jpg")}
         resizeMode="cover"
         style={styles.view}
       >
         <View style={{ marginBottom: 80, marginTop: 40 }}>
-          <IconButton
-            icon="menu"
-            color={"white"}
-            size={30}
-            onPress={() => navigation.openDrawer()}
-          />
+          <View style={{ flexDirection: "row" }}>
+            <IconButton
+              icon="menu"
+              color={"white"}
+              size={30}
+              onPress={() => navigation.openDrawer()}
+            />
+
+            {/* <Avatar.Image
+              size={60}
+              style={{
+                marginLeft: 90,
+                backgroundColor: "rgba(0,0,0,0)",
+              }}
+              source={require("../assets/adaptive-icon.png")}
+            /> */}
+          </View>
         </View>
+
         <Text
           style={{
             fontSize: 35,
