@@ -1,6 +1,13 @@
 import React, { useState } from "react";
 
-import { StyleSheet, Text, View, ScrollView, ToastAndroid } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  ScrollView,
+  ToastAndroid,
+  Dimensions,
+} from "react-native";
 
 import {
   Provider as PaperProvider,
@@ -17,15 +24,24 @@ import {
   ProgressBar,
 } from "react-native-paper";
 import DateTimePicker from "@react-native-community/datetimepicker";
-
+import { LineChart } from "react-native-chart-kit";
 import { useSelector, useDispatch } from "react-redux";
 
 import { updateUser } from "../../reduxConfig/actions/userAction";
 
 function Profile({ navigation }) {
   const dispatch = useDispatch();
-  const { firstName, lastName, gender, DOB, height, weight, bpSys, bpDia } =
-    useSelector((state) => state.userReducer);
+  const {
+    firstName,
+    lastName,
+    gender,
+    DOB,
+    height,
+    weight,
+    bpSys,
+    bpDia,
+    recDate,
+  } = useSelector((state) => state.userReducer);
   const theme = {
     ...DefaultTheme,
 
@@ -46,8 +62,12 @@ function Profile({ navigation }) {
     height: height,
     weight: weight,
     dob: DOB,
-    bpsystolic: bpSys, // blood pressure upper number
-    bpdiastolic: bpDia, // blood pressure lower number
+    bpsystolic: "", // blood pressure upper number
+    bpdiastolic: "", // blood pressure lower number
+
+    bpSysArr: bpSys,
+    bpDiaArr: bpDia,
+    recDateArr: [],
 
     visible: false,
     validateFirstName: false,
@@ -61,6 +81,12 @@ function Profile({ navigation }) {
   });
 
   const [show, setShow] = useState(false);
+  const [openFAB, setOpenFAB] = useState({ open: false });
+  const [visible, setVisible] = useState(false);
+  const onFABChange = ({ open }) => setOpenFAB({ open });
+  const showDialog = () => setVisible(true);
+  const hideDialog = () => setVisible(false);
+  const { open } = openFAB;
 
   //* regex for wrong name input
   const firstNameValidation = () => {
@@ -168,8 +194,9 @@ function Profile({ navigation }) {
       height: userInfo.height,
       weight: userInfo.weight,
       dob: userInfo.dob,
-      bpsystolic: userInfo.bpsystolic,
-      bpdiastolic: userInfo.bpdiastolic,
+      bpsystolic: bpSys,
+      bpdiastolic: bpDia,
+      recordeddate: recDate,
     };
     dispatch(updateUser(finalData));
   };
@@ -239,7 +266,7 @@ function Profile({ navigation }) {
   };
 
   const calculateBP = () => {
-    if (bpDia === "" || bpSys === "") {
+    if (userInfo.bpDiaArr.length === 0) {
       console.log("bp data unavailable");
       return (
         <View>
@@ -249,8 +276,8 @@ function Profile({ navigation }) {
         </View>
       );
     } else {
-      var tmpSys = parseInt(bpSys);
-      var tmpDia = parseInt(bpDia);
+      var tmpSys = bpSys[bpSys.length - 1];
+      var tmpDia = bpDia[bpDia.length - 1];
       if (tmpSys <= 90 && tmpDia <= 60) {
         return (
           <View>
@@ -295,6 +322,152 @@ function Profile({ navigation }) {
     }
   };
 
+  const logbloodpressure = () => {
+    const x = parseInt(userInfo.bpsystolic);
+    const y = parseInt(userInfo.bpdiastolic);
+    const month = new Date().getMonth() + 1;
+    const date = new Date().getDate();
+    const logDate = `${date}/${month}`;
+    const tmpSys = userInfo.bpSysArr;
+    const tmpDia = userInfo.bpDiaArr;
+    const tmpRecDate = userInfo.recDateArr;
+    const a = userInfo.bpSysArr.length;
+
+    console.log(typeof userInfo.bpSysArr);
+    if (a === 8) {
+      tmpSys.splice(0, 1);
+      tmpDia.splice(0, 1);
+      tmpRecDate.splice(0, 1);
+
+      tmpSys.push(x);
+      tmpDia.push(y);
+      tmpRecDate.push(logDate);
+
+      const finalData = {
+        fName: userInfo.firstName,
+        lName: userInfo.lastName,
+        gender: userInfo.gender,
+        height: userInfo.height,
+        weight: userInfo.weight,
+        dob: userInfo.dob,
+        bpsystolic: tmpSys,
+        bpdiastolic: tmpDia,
+        recordeddate: tmpRecDate,
+      };
+      dispatch(updateUser(finalData));
+    } else {
+      tmpSys.push(x);
+      tmpDia.push(y);
+      tmpRecDate.push(logDate);
+
+      const finalData = {
+        fName: userInfo.firstName,
+        lName: userInfo.lastName,
+        gender: userInfo.gender,
+        height: userInfo.height,
+        weight: userInfo.weight,
+        dob: userInfo.dob,
+        bpsystolic: tmpSys,
+        bpdiastolic: tmpDia,
+        recordeddate: tmpRecDate,
+      };
+      dispatch(updateUser(finalData));
+    }
+
+    console.log(
+      "length :",
+      a,
+      userInfo.bpSysArr,
+      userInfo.bpDiaArr,
+      userInfo.recDateArr
+    );
+    setUserInfo({ ...userInfo, bpsystolic: "", bpdiastolic: "" });
+  };
+
+  const renderBpChart = () => {
+    if (userInfo.bpDiaArr.length === 0) {
+      return (
+        <Text style={{ alignSelf: "center", fontSize: 15 }}>
+          Chart Unavailable
+        </Text>
+      );
+    } else {
+      return (
+        <LineChart
+          data={{
+            labels: userInfo.recDateArr,
+            datasets: [
+              {
+                data: userInfo.bpSysArr,
+              },
+            ],
+          }}
+          width={Dimensions.get("window").width - 65} // from react-native
+          height={220}
+          // yAxisLabel={"Sys"}
+          chartConfig={{
+            backgroundColor: "#1cc910",
+            backgroundGradientFrom: "#eff3ff",
+            backgroundGradientTo: "#efefef",
+            strokeWidth: 2,
+            decimalPlaces: 0, // optional, defaults to 2dp
+            color: (opacity = 255) => `rgba(0, 0, 0, ${opacity})`,
+            style: {
+              borderRadius: 16,
+            },
+          }}
+          bezier
+          style={{
+            marginVertical: 8,
+            borderRadius: 16,
+          }}
+        />
+      );
+    }
+  };
+
+  const renderDiaBpChart = () => {
+    if (userInfo.bpDiaArr.length === 0) {
+      return (
+        <Text style={{ alignSelf: "center", fontSize: 15 }}>
+          Chart Unavailable
+        </Text>
+      );
+    } else {
+      return (
+        <LineChart
+          data={{
+            labels: userInfo.recDateArr,
+            datasets: [
+              {
+                data: userInfo.bpDiaArr,
+              },
+            ],
+          }}
+          width={Dimensions.get("window").width - 65} // from react-native
+          height={220}
+          // yAxisLabel={"Sys"}
+          chartConfig={{
+            backgroundColor: "#1cc910",
+            backgroundGradientFrom: "#eff3ff",
+            backgroundGradientTo: "#efefef",
+            strokeWidth: 2,
+            decimalPlaces: 0, // optional, defaults to 2dp
+            color: (opacity = 255) => `rgba(0, 0, 0, ${opacity})`,
+            style: {
+              borderRadius: 16,
+            },
+          }}
+          bezier
+          style={{
+            marginVertical: 8,
+            borderRadius: 16,
+          }}
+        />
+      );
+    }
+  };
+
   return (
     <PaperProvider theme={theme}>
       <Appbar.Header
@@ -308,7 +481,7 @@ function Profile({ navigation }) {
       <ScrollView>
         <Text
           style={{
-            fontSize: 35,
+            fontSize: 28,
             marginTop: 15,
             marginLeft: 25,
             fontWeight: "bold",
@@ -316,8 +489,8 @@ function Profile({ navigation }) {
         >
           Profile
         </Text>
-        <Divider style={{ backgroundColor: "black", marginTop: 15 }} />
-        <View style={{ marginTop: 20, marginBottom: 80 }}>
+        {/* <Divider style={{ backgroundColor: "black", marginTop: 15 }} /> */}
+        <View style={{ marginTop: 5, marginBottom: 80 }}>
           <Card
             style={{
               width: "90%",
@@ -375,8 +548,8 @@ function Profile({ navigation }) {
                   <Text style={{ fontSize: 15 }}>{userInfo.weight}</Text>
                 </View>
               </View>
-              <Text>{"\n"}</Text>
-              <View style={{ flexDirection: "row" }}>
+              {/* <Text>{"\n"}</Text>
+               <View style={{ flexDirection: "row" }}>
                 <View style={{ flex: 1 }}>
                   <Text style={{ fontSize: 15 }}>
                     Blood Pressure (Systolic):
@@ -396,9 +569,20 @@ function Profile({ navigation }) {
                 <View style={{ flex: 1 }}>
                   <Text style={{ fontSize: 15 }}>{userInfo.bpdiastolic}</Text>
                 </View>
-              </View>
+              </View> */}
             </Card.Content>
           </Card>
+          <Divider style={{ backgroundColor: "black", marginTop: 25 }} />
+          <Text
+            style={{
+              fontSize: 28,
+              marginTop: 10,
+              marginLeft: 25,
+              fontWeight: "bold",
+            }}
+          >
+            Analytics
+          </Text>
           <Card
             style={{
               width: "90%",
@@ -412,6 +596,7 @@ function Profile({ navigation }) {
           >
             <Card.Content>{calculateBMI()}</Card.Content>
           </Card>
+
           <Card
             style={{
               width: "90%",
@@ -425,12 +610,78 @@ function Profile({ navigation }) {
           >
             <Card.Content>{calculateBP()}</Card.Content>
           </Card>
+          <Text
+            style={{
+              fontSize: 17,
+              marginTop: 10,
+              marginLeft: 25,
+              fontWeight: "bold",
+            }}
+          >
+            TRENDS
+          </Text>
+          <Text
+            style={{
+              fontSize: 15,
+              marginTop: 10,
+              marginLeft: 25,
+            }}
+          >
+            Systolic Blood Pressure
+          </Text>
+          <Card
+            style={{
+              width: "90%",
+              alignSelf: "center",
+              marginTop: 15,
+              elevation: 4,
+              borderRadius: 20,
+            }}
+          >
+            <Card.Content>{renderBpChart()}</Card.Content>
+          </Card>
+          <Text
+            style={{
+              fontSize: 15,
+              marginTop: 10,
+              marginLeft: 25,
+            }}
+          >
+            Diastolic Blood Pressure
+          </Text>
+          <Card
+            style={{
+              width: "90%",
+              alignSelf: "center",
+              marginTop: 15,
+              elevation: 4,
+              borderRadius: 20,
+            }}
+          >
+            <Card.Content>{renderDiaBpChart()}</Card.Content>
+          </Card>
         </View>
       </ScrollView>
-      <FAB
-        style={{ position: "absolute", margin: 16, right: 0, bottom: 0 }}
-        icon="account-edit-outline"
-        onPress={() => setUserInfo({ ...userInfo, visible: true })}
+      <FAB.Group
+        open={open}
+        icon={open ? "close" : "menu"}
+        actions={[
+          {
+            icon: "blood-bag",
+            label: "Log BP",
+            onPress: () => {
+              showDialog();
+            },
+          },
+          {
+            icon: "account-edit-outline",
+            label: "Edit Info",
+            onPress: () => {
+              setUserInfo({ ...userInfo, visible: true });
+            },
+          },
+        ]}
+        onStateChange={onFABChange}
       />
       <Portal>
         <Modal
@@ -506,7 +757,7 @@ function Profile({ navigation }) {
                   <View>
                     <TextInput
                       dense={true}
-                      label="Year of Birth"
+                      label="Date of Birth"
                       mode="flat"
                       value={displayDOB()}
                       style={{ justifyContent: "flex-end" }}
@@ -565,7 +816,7 @@ function Profile({ navigation }) {
                   </View>
                 </View>
               </View>
-              <View>
+              {/* <View>
                 <TextInput
                   dense={true}
                   label="Blood Pressure(Systolic)"
@@ -602,7 +853,7 @@ function Profile({ navigation }) {
                 <HelperText type="error" visible={userInfo.validateBpDias}>
                   Only Numbers!
                 </HelperText>
-              </View>
+              </View> */}
               <View
                 style={{
                   flexDirection: "row",
@@ -653,9 +904,10 @@ function Profile({ navigation }) {
                         lastNameValidation() ||
                         genderValidation() ||
                         heightValidation() ||
-                        weightValidation() ||
-                        bpSysValidation() ||
-                        bpDiaValidation()
+                        weightValidation()
+                        // ||
+                        // bpSysValidation() ||
+                        // bpDiaValidation()
                       ) {
                       } else {
                         updateUserInfo();
@@ -682,6 +934,98 @@ function Profile({ navigation }) {
               onChange={onChange}
             />
           )}
+        </Modal>
+      </Portal>
+      <Portal>
+        <Modal
+          visible={visible}
+          dismissable={true}
+          onDismiss={hideDialog}
+          contentContainerStyle={{
+            backgroundColor: "white",
+            padding: 20,
+            width: "90%",
+            alignSelf: "center",
+            borderRadius: 20,
+            marginBottom: 10,
+          }}
+        >
+          <View>
+            <TextInput
+              dense={true}
+              label="Blood Pressure(Systolic)"
+              mode="flat"
+              keyboardType="numeric"
+              value={userInfo.bpsystolic}
+              maxLength={3}
+              onChangeText={(text) =>
+                setUserInfo({ ...userInfo, bpsystolic: text })
+              }
+              onBlur={() => bpSysValidation()}
+              error={userInfo.validateBpSys}
+            />
+            <HelperText type="error" visible={userInfo.validateBpSys}>
+              Only Numbers!
+            </HelperText>
+          </View>
+          <View>
+            <TextInput
+              dense={true}
+              label="Blood Pressure(Diastolic)"
+              mode="flat"
+              keyboardType="numeric"
+              value={userInfo.bpdiastolic}
+              style={styles.subInput}
+              maxLength={3}
+              onChangeText={(text) =>
+                setUserInfo({ ...userInfo, bpdiastolic: text })
+              }
+              onBlur={() => bpDiaValidation()}
+              error={userInfo.validateBpDias}
+            />
+            <HelperText type="error" visible={userInfo.validateBpDias}>
+              Only Numbers!
+            </HelperText>
+          </View>
+          <View
+            style={{
+              flexDirection: "row",
+              marginBottom: 10,
+              marginLeft: 70,
+            }}
+          >
+            <View style={{ flex: 1 }}>
+              <Button
+                mode="contained"
+                color="#404040"
+                compact={true}
+                style={{ justifyContent: "flex-start" }}
+                onPress={hideDialog}
+              >
+                Cancel
+              </Button>
+            </View>
+            <View style={{ flex: 1 }}>
+              <Button
+                mode="contained"
+                color="#404040"
+                compact={true}
+                onPress={() => {
+                  if (bpSysValidation() || bpDiaValidation()) {
+                  } else {
+                    logbloodpressure();
+                    hideDialog();
+                  }
+                }}
+                style={{
+                  justifyContent: "flex-end",
+                  marginLeft: 10,
+                }}
+              >
+                Log
+              </Button>
+            </View>
+          </View>
         </Modal>
       </Portal>
     </PaperProvider>
